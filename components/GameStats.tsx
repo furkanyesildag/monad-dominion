@@ -9,96 +9,135 @@ interface GameStatsProps {
 }
 
 const Container = styled.div`
-  font-family: 'Inter', sans-serif;
-  background: rgba(251, 250, 249, 0.06); /* Monad Kirli Beyaz - subtle */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(251, 250, 249, 0.12);
+  border: 2px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
   box-shadow: 
-    0 4px 24px rgba(32, 0, 82, 0.15), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(251, 250, 249, 0.08);
-  border-radius: 8px;
-  padding: 0.75rem;
+    inset 1px 1px 0 rgba(255, 255, 255, 0.2),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.4),
+    3px 3px 0 rgba(131, 110, 249, 0.3);
+  border-radius: 0;
+  padding: 0.5rem;
+  image-rendering: pixelated;
+  min-height: 80px;
+  width: 100%;
+  max-width: 180px;
 `
 
 const Title = styled.h3`
-  font-family: 'Inter', sans-serif;
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  font-weight: 700; /* Inter Bold */
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  text-shadow: 0 0 16px rgba(131, 110, 249, 0.4); /* Monad Moru glow */
-  letter-spacing: -0.01em; /* Inter optimal spacing */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  margin: 0 0 0.4rem 0;
+  font-size: 8px;
+  font-weight: 400;
+  color: #FBFAF9;
+  text-shadow: 
+    1px 1px 0 #836EF9,
+    2px 2px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 0.4px;
+  image-rendering: pixelated;
+  line-height: 1.1;
+  text-align: center;
+`
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+  margin-bottom: 0.3rem;
 `
 
 const StatItem = styled.div<{ faction: number; isPlayerFaction: boolean }>`
   font-family: 'Inter', sans-serif;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 0.4rem;
-  margin-bottom: 0.3rem;
-  border-radius: 6px;
-  background: ${props => {
-    if (props.isPlayerFaction) return 'rgba(131, 110, 249, 0.15)' /* Monad Moru highlight */
-    return 'rgba(255, 255, 255, 0.05)'
-  }};
-  border: ${props => props.isPlayerFaction ? '1px solid rgba(131, 110, 249, 0.3)' : '1px solid rgba(251, 250, 249, 0.1)'};
+  padding: 0.3rem;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(251, 250, 249, 0.1);
   transition: all 0.2s ease;
+  text-align: center;
+  min-height: 40px;
   
   &:hover {
-    background: ${props => props.isPlayerFaction ? 'rgba(131, 110, 249, 0.2)' : 'rgba(255, 255, 255, 0.08)'};
+    background: rgba(255, 255, 255, 0.08);
   }
 `
 
 const FactionInfo = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.15rem;
+  margin-bottom: 0.15rem;
 `
 
 const FactionColor = styled.div<{ faction: number }>`
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: ${props => {
     switch (props.faction) {
-      case 1: return '#836EF9' /* Cmty - Monad Moru */
-      case 2: return '#A0055D' /* Eco - Monad Böğürtleni */
-      case 3: return '#FBFAF9' /* Dev - Monad Kirli Beyaz */
-      case 4: return '#0E100F' /* Xyz - Monad Siyahı */
+      case 1: return '#836EF9'
+      case 2: return '#A0055D'
+      case 3: return '#FBFAF9'
+      case 4: return '#0E100F'
       default: return '#666666'
     }
   }};
   border: 1px solid rgba(251, 250, 249, 0.3);
-  box-shadow: 0 0 4px rgba(131, 110, 249, 0.2);
+  box-shadow: 0 0 2px rgba(131, 110, 249, 0.2);
 `
 
 const FactionName = styled.span`
-  font-family: 'Inter', sans-serif;
-  font-weight: 600; /* Inter SemiBold */
-  font-size: 0.75rem;
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  letter-spacing: -0.01em;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-weight: 400;
+  font-size: 6px;
+  color: #FBFAF9;
+  letter-spacing: 0.3px;
+  image-rendering: pixelated;
+  line-height: 1.1;
 `
 
 const TerritoryCount = styled.span`
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-weight: 400;
+  font-size: 10px;
+  color: #FBFAF9;
+  text-shadow: 
+    1px 1px 0 #836EF9,
+    2px 2px 0 rgba(131, 110, 249, 0.5);
+  image-rendering: pixelated;
+`
+
+const FactionDetails = styled.div`
   font-family: 'Inter', sans-serif;
-  font-weight: 700; /* Inter Bold */
-  font-size: 0.875rem;
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  text-shadow: 0 0 8px rgba(131, 110, 249, 0.4);
+  font-size: 4px;
+  color: rgba(251, 250, 249, 0.7);
+  text-align: center;
+  line-height: 1.1;
+  margin-top: 0.1rem;
 `
 
 const TotalTerritories = styled.div`
-  font-family: 'Inter', sans-serif;
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(251, 250, 249, 0.1);
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  margin-top: 0.2rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid rgba(251, 250, 249, 0.2);
   text-align: center;
-  font-size: 0.65rem;
+  font-size: 4px;
   font-weight: 400;
-  color: rgba(251, 250, 249, 0.7);
-  letter-spacing: -0.01em;
+  color: rgba(251, 250, 249, 0.8);
+  letter-spacing: 0.3px;
+  image-rendering: pixelated;
+  line-height: 1.1;
 `
 
 const factions = [
@@ -129,33 +168,26 @@ export default function GameStats({ factionStats, playerFaction, availableFactio
     <Container>
       <Title>🏰 Live Battle Stats</Title>
       
-      {availableFactions.map((faction, index) => {
-        const count = stats[index] || 0
-        const isPlayerFaction = playerFaction === faction.id
-        const percentage = totalTerritories > 0 ? ((Number(count) / totalTerritories) * 100).toFixed(1) : '0'
-        
-        return (
-          <StatItem key={faction.id} faction={faction.id} isPlayerFaction={isPlayerFaction}>
-            <FactionInfo>
-              <FactionColor faction={faction.id} />
-              <div>
+      <StatsGrid>
+        {availableFactions.map((faction, index) => {
+          const count = stats[index] || 0
+          const isPlayerFaction = playerFaction === faction.id
+          const percentage = totalTerritories > 0 ? ((Number(count) / totalTerritories) * 100).toFixed(1) : '0'
+          
+          return (
+            <StatItem key={faction.id} faction={faction.id} isPlayerFaction={isPlayerFaction}>
+              <FactionInfo>
+                <FactionColor faction={faction.id} />
                 <FactionName>{faction.symbol} {faction.name}</FactionName>
-                <div style={{ 
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '0.65rem', 
-                  color: 'rgba(251, 250, 249, 0.6)', 
-                  marginTop: '1px',
-                  fontWeight: '400',
-                  letterSpacing: '-0.01em'
-                }}>
-                  {percentage}% • {faction.memberCount || 1} members
-                </div>
-              </div>
-            </FactionInfo>
-            <TerritoryCount>{count.toString()}</TerritoryCount>
-          </StatItem>
-        )
-      })}
+              </FactionInfo>
+              <TerritoryCount>{count.toString()}</TerritoryCount>
+              <FactionDetails>
+                {percentage}% • {faction.memberCount || 1} members
+              </FactionDetails>
+            </StatItem>
+          )
+        })}
+      </StatsGrid>
       
       <TotalTerritories>
         Total: {totalTerritories} territories • {(300 - totalTerritories)} unclaimed
@@ -163,11 +195,11 @@ export default function GameStats({ factionStats, playerFaction, availableFactio
       
       <div style={{ 
         fontFamily: 'Inter, sans-serif',
-        marginTop: '0.5rem', 
-        padding: '0.375rem', 
+        marginTop: '0.15rem', 
+        padding: '0.15rem', 
         background: 'rgba(131, 110, 249, 0.1)', 
-        borderRadius: '6px',
-        fontSize: '0.65rem',
+        borderRadius: '2px',
+        fontSize: '4px',
         fontWeight: '400',
         color: 'rgba(251, 250, 249, 0.7)',
         textAlign: 'center',

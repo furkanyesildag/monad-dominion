@@ -13,48 +13,70 @@ export interface StreakData {
   maxGamesPerDay: number
   paintingCapacity: number
   lastStreakTime: string
+  lastPlayDate: string
 }
 
 const Container = styled.div`
-  font-family: 'Inter', sans-serif;
-  background: rgba(251, 250, 249, 0.06); /* Monad Kirli Beyaz - subtle */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(251, 250, 249, 0.12);
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
   box-shadow: 
-    0 4px 24px rgba(32, 0, 82, 0.15), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(251, 250, 249, 0.08);
-  border-radius: 12px;
-  padding: 1rem;
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+    6px 6px 0 rgba(131, 110, 249, 0.3);
+  border-radius: 0;
+  padding: 1.25rem;
+  image-rendering: pixelated;
 `
 
 const Title = styled.h3`
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  font-weight: 700; /* Inter Bold */
-  margin-bottom: 0.75rem;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 13px; /* BIGGER! */
+  font-weight: 400;
+  margin-bottom: 1rem;
   text-align: center;
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  text-shadow: 0 0 16px rgba(131, 110, 249, 0.4); /* Monad Moru glow */
-  letter-spacing: -0.01em; /* Inter optimal spacing */
-  line-height: 1.2;
+  color: #FBFAF9;
+  text-shadow: 
+    3px 3px 0 #836EF9,
+    5px 5px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  image-rendering: pixelated;
 `
 
 const ClaimButton = styled(motion.button)`
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); /* Purple gradient */
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #9C27B0 0px, #9C27B0 2px,
+      #AB47BC 2px, #AB47BC 4px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #7B1FA2 #7B1FA2 #FBFAF9;
+  border-radius: 0;
   color: #FFFFFF;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 700; /* Inter Bold */
+  padding: 14px 24px; /* BIGGER! */
+  font-size: 12px; /* BIGGER! */
+  font-weight: 400;
   cursor: pointer;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
   width: 100%;
-  box-shadow: 0 4px 16px rgba(156, 39, 176, 0.4);
-  transition: all 0.2s ease;
-  letter-spacing: -0.01em;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    6px 6px 0 #7B1FA2;
+  transition: none;
+  letter-spacing: 2px;
   text-transform: uppercase;
+  image-rendering: pixelated;
   
   &:hover:not(:disabled) {
     background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%); /* Pink gradient on hover */
@@ -107,25 +129,29 @@ const StatCard = styled.div`
 `
 
 const StatValue = styled.div<{ highlight?: boolean }>`
-  font-family: 'Inter', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700; /* Inter Bold */
-  color: ${props => props.highlight ? '#FBFAF9' : '#FBFAF9'}; /* Monad Kirli Beyaz */
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.02em; /* Inter optimal spacing */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 24px; /* BIGGER! */
+  font-weight: 400;
+  color: ${props => props.highlight ? '#FFD700' : '#FBFAF9'};
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
   text-shadow: ${props => props.highlight ? 
-    '0 0 12px rgba(131, 110, 249, 0.6)' : /* Monad Moru glow */
-    'none'
+    '3px 3px 0 #836EF9, 5px 5px 0 rgba(131, 110, 249, 0.6)' :
+    '2px 2px 0 rgba(131, 110, 249, 0.4)'
   };
+  image-rendering: pixelated;
+  line-height: 1.4;
 `
 
 const StatLabel = styled.div`
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500; /* Inter Medium */
-  color: rgba(251, 250, 249, 0.7); /* Monad Kirli Beyaz - muted */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 9px; /* BIGGER! */
+  font-weight: 400;
+  color: rgba(251, 250, 249, 0.8);
   text-transform: uppercase;
-  letter-spacing: 0.05em; /* Inter optimal spacing */
+  letter-spacing: 1px;
+  image-rendering: pixelated;
+  line-height: 1.6;
 `
 
 const ProgressBar = styled.div`
@@ -178,7 +204,8 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
     gamesPlayedToday: 0,
     maxGamesPerDay: 6,
     paintingCapacity: 1,
-    lastStreakTime: ''
+    lastStreakTime: '',
+    lastPlayDate: ''
   })
   const [mounted, setMounted] = useState(false)
   const [canClaimStreak, setCanClaimStreak] = useState(false)
@@ -199,7 +226,8 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
       gamesPlayedToday: 0,
       maxGamesPerDay: 6,
       paintingCapacity: 1,
-      lastStreakTime: ''
+      lastStreakTime: '',
+      lastPlayDate: ''
     }
     
     // Check if 1 minute has passed since last streak claim
@@ -260,7 +288,7 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
   useEffect(() => {
     if (!mounted || !playerAddress) return
     localStorage.setItem(`${STORAGE_KEY}-${playerAddress}`, JSON.stringify(streakData))
-  }, [mounted, streakData, playerAddress])
+  }, [mounted, playerAddress, streakData.minuteStreak, streakData.gamesPlayedToday, streakData.lastStreakTime, streakData.lastPlayDate, streakData.paintingCapacity])
 
   const handleClaimStreak = async () => {
     if (!canClaimStreak || !playerAddress) return
@@ -319,7 +347,7 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
       ...streakData,
       gamesPlayedToday: streakData.gamesPlayedToday + 1,
       lastPlayDate: today,
-      paintingCapacity: Math.min(10, 1 + streakData.dailyStreak + streakData.gamesPlayedToday + 1)
+      paintingCapacity: Math.min(10, 1 + streakData.minuteStreak + streakData.gamesPlayedToday + 1)
     }
 
     // If this is the first game of the day, start/continue streak
@@ -330,9 +358,9 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
         const daysDiff = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
         
         if (daysDiff === 1 || streakData.lastPlayDate === '') {
-          newData.dailyStreak = streakData.dailyStreak + 1
+          newData.minuteStreak = streakData.minuteStreak + 1
         } else {
-          newData.dailyStreak = 1
+          newData.minuteStreak = 1
         }
       }
     }

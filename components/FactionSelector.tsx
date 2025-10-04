@@ -8,15 +8,23 @@ interface FactionSelectorProps {
 }
 
 const Container = styled.div`
-  font-family: 'Inter', sans-serif;
-  background: rgba(251, 250, 249, 0.06); /* Monad Kirli Beyaz - subtle */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(251, 250, 249, 0.12);
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
   box-shadow: 
-    0 4px 24px rgba(32, 0, 82, 0.15), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(251, 250, 249, 0.08);
-  border-radius: 8px;
-  padding: 0.75rem;
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+    6px 6px 0 rgba(131, 110, 249, 0.3);
+  border-radius: 0;
+  padding: 1.25rem;
+  image-rendering: pixelated;
 `
 
 const FactionGrid = styled.div`
@@ -26,13 +34,17 @@ const FactionGrid = styled.div`
 `
 
 const Title = styled.h3`
-  font-family: 'Inter', sans-serif;
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  font-weight: 700; /* Inter Bold */
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  text-shadow: 0 0 16px rgba(131, 110, 249, 0.4); /* Monad Moru glow */
-  letter-spacing: -0.01em; /* Inter optimal spacing */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  margin: 0 0 1rem 0;
+  font-size: 13px; /* BIGGER! */
+  font-weight: 400;
+  color: #FBFAF9;
+  text-shadow: 
+    3px 3px 0 #836EF9,
+    5px 5px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 1px;
+  image-rendering: pixelated;
+  line-height: 1.6;
 `
 
 const FactionCard = styled(motion.div)<{ faction: number; isSelected: boolean; isPlayerFaction: boolean }>`
@@ -67,25 +79,45 @@ const FactionCard = styled(motion.div)<{ faction: number; isSelected: boolean; i
   }
 `
 
-const FactionName = styled.div`
-  font-family: 'Inter', sans-serif;
-  font-weight: 600; /* Inter SemiBold */
-  font-size: 0.75rem;
-  margin-bottom: 0.2rem;
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  letter-spacing: -0.01em; /* Inter optimal spacing */
+const FactionName = styled.div<{ faction: number }>`
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-weight: 400;
+  font-size: 11px;
+  margin-bottom: 0.5rem;
+  color: ${props => {
+    switch (props.faction) {
+      case 1: return '#228B22' /* Cmty - Koyu Yeşil */
+      case 2: return '#A0055D' /* Eco - Monad Böğürtleni */
+      case 3: return '#FBFAF9' /* Dev - Monad Kirli Beyaz */
+      case 4: return '#0E100F' /* Xyz - Monad Siyahı */
+      default: return '#FBFAF9'
+    }
+  }};
+  letter-spacing: 1px;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  text-shadow: ${props => {
+    switch (props.faction) {
+      case 1: return '2px 2px 0 rgba(0, 0, 0, 0.8)' /* Cmty için siyah gölge */
+      case 2: return '2px 2px 0 rgba(0, 0, 0, 0.8)'
+      case 3: return '2px 2px 0 rgba(0, 0, 0, 0.8)'
+      case 4: return '2px 2px 0 rgba(255, 255, 255, 0.8)'
+      default: return '2px 2px 0 rgba(0, 0, 0, 0.8)'
+    }
+  }};
+  image-rendering: pixelated;
+  line-height: 1.6;
 `
 
 const FactionDescription = styled.div`
-  font-family: 'Inter', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 400; /* Inter Regular */
-  color: rgba(251, 250, 249, 0.6); /* Monad Kirli Beyaz - muted */
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 8px; /* BIGGER! */
+  font-weight: 400;
+  color: rgba(251, 250, 249, 0.7);
+  line-height: 1.8;
+  letter-spacing: 1px;
+  image-rendering: pixelated;
 `
 
 const FactionIcon = styled.div<{ faction: number }>`
@@ -118,7 +150,7 @@ export default function FactionSelector({ factions, selectedFaction, onFactionSe
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <FactionName>{faction.symbol} {faction.name}</FactionName>
+            <FactionName faction={faction.id}>{faction.symbol} {faction.name}</FactionName>
             <FactionDescription>
               {faction.description}
             </FactionDescription>

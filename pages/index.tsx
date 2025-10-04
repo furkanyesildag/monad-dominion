@@ -9,13 +9,11 @@ import HexGrid from '../components/HexGrid'
 import FactionSelector from '../components/FactionSelector'
 import GameTimer from '../components/GameTimer'
 import GameStats from '../components/GameStats'
-import LiveFeed from '../components/LiveFeed'
 import StreakSystem, { StreakData } from '../components/StreakSystem'
-import { useTerritoryUpdates } from '../hooks/useTerritoryUpdates'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, FACTIONS, NFT_CONTRACT_ADDRESS } from '../lib/config'
 import { sendMonadTransaction, checkBalance, isOnMonadTestnet, switchToMonadTestnet, clearStuckTransactions } from '../lib/transaction-utils'
 import { updatePlayerStats } from './leaderboard'
-import { getMultiplayerClient, MultiplayerClient, RoomData } from '../lib/websocket-client'
+import { getVercelMultiplayer, VercelMultiplayer, RoomData } from '../lib/vercel-multiplayer'
 
 
 const Container = styled.div`
@@ -29,19 +27,150 @@ const Container = styled.div`
   position: relative;
 `
 
+// Tutorial Popup Components
+const TutorialOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+`
+
+const TutorialModal = styled(motion.div)`
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+    8px 8px 0 rgba(131, 110, 249, 0.3);
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  image-rendering: pixelated;
+  position: relative;
+`
+
+const TutorialCloseButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #A0055D;
+  border: 3px solid #FBFAF9;
+  color: #FBFAF9;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    3px 3px 0 rgba(0, 0, 0, 0.5);
+  transition: none;
+  
+  &:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 
+      inset 3px 3px 0 rgba(255, 255, 255, 0.4),
+      inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+      2px 2px 0 rgba(0, 0, 0, 0.5);
+  }
+  
+  &:active {
+    transform: translate(2px, 2px);
+    box-shadow: 
+      inset 4px 4px 0 rgba(0, 0, 0, 0.5),
+      inset -4px -4px 0 rgba(255, 255, 255, 0.2),
+      1px 1px 0 rgba(0, 0, 0, 0.5);
+  }
+`
+
+const TutorialTitle = styled.h2`
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  font-weight: 400;
+  color: #FBFAF9;
+  text-shadow: 
+    3px 3px 0 #836EF9,
+    6px 6px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  image-rendering: pixelated;
+`
+
+const TutorialStep = styled.div`
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(14, 16, 15, 0.3);
+  border: 2px solid rgba(131, 110, 249, 0.3);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.1),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.2);
+`
+
+const TutorialStepTitle = styled.h3`
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  color: #FFD700;
+  text-shadow: 
+    2px 2px 0 #836EF9,
+    4px 4px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  image-rendering: pixelated;
+`
+
+const TutorialStepText = styled.p`
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  font-weight: 400;
+  color: #FBFAF9;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  line-height: 1.6;
+  margin: 0;
+  image-rendering: pixelated;
+`
+
 const Header = styled.header`
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(251, 250, 249, 0.08); /* Monad Kirli Beyaz - subtle */
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
   backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(251, 250, 249, 0.15);
+  border-bottom: 4px solid #836EF9;
   box-shadow: 
-    0 4px 24px rgba(32, 0, 82, 0.2), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(251, 250, 249, 0.1);
+    inset 0 -3px 0 rgba(0, 0, 0, 0.4),
+    0 6px 20px rgba(32, 0, 82, 0.3);
   flex-shrink: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  image-rendering: pixelated;
 `
 
 const HeaderLeft = styled.div`
@@ -50,23 +179,49 @@ const HeaderLeft = styled.div`
   gap: 2rem;
 `
 
-const LeaderboardButton = styled(motion.div)`
-  background: linear-gradient(45deg, #FFD700, #FFA500);
-  border: none;
-  border-radius: 8px;
-  color: #000;
+const LeaderboardButton = styled(Link)`
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #FFD700 0px, #FFD700 2px,
+      #FFA500 2px, #FFA500 4px
+    );
+  border: 3px solid;
+  border-color: #FFD700 #FFA500 #FFA500 #FFD700;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    4px 4px 0 rgba(255, 165, 0, 0.3);
+  color: #0E100F;
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+  image-rendering: pixelated;
+  transition: none;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    transform: translate(2px, 2px);
+    box-shadow: 
+      inset 1px 1px 0 rgba(255, 255, 255, 0.4),
+      inset -1px -1px 0 rgba(0, 0, 0, 0.4),
+      2px 2px 0 rgba(255, 165, 0, 0.4);
+    transition: none;
+  }
+  
+  &:active {
+    transform: translate(4px, 4px);
+    box-shadow: 
+      inset 0px 0px 0 rgba(255, 255, 255, 0.5),
+      inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+      0px 0px 0 rgba(255, 165, 0, 0.5);
+    transition: none;
   }
 `
 
@@ -195,16 +350,39 @@ const UsernameDisplay = styled.div`
 `
 
 const Title = styled.h1`
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  font-weight: 800; /* Inter Extra Bold */
-  color: #FBFAF9; /* Monad Kirli Beyaz */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 20px;
+  font-weight: 400;
+  color: #FBFAF9;
   text-shadow: 
-    0 0 24px rgba(131, 110, 249, 0.6), /* Monad Moru glow */
-    0 2px 8px rgba(32, 0, 82, 0.4); /* Monad Mavisi depth */
+    4px 0 0 #836EF9,
+    0 4px 0 #836EF9,
+    4px 4px 0 #836EF9,
+    8px 8px 0 #200052;
   margin: 0;
-  letter-spacing: -0.02em; /* Inter optimal spacing */
-  line-height: 1.1;
+  letter-spacing: 2px;
+  line-height: 1.6;
+  image-rendering: pixelated;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`
+
+const MonadLogo = styled.div`
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(2px 2px 0 #836EF9) drop-shadow(4px 4px 0 rgba(131, 110, 249, 0.5));
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
 `
 
 
@@ -218,21 +396,29 @@ const GameArea = styled.div`
 `
 
 const MapContainer = styled.div`
-  font-family: 'Inter', sans-serif;
-  background: rgba(251, 250, 249, 0.04); /* Monad Kirli Beyaz - very subtle */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(32, 0, 82, 0.3) 0px, rgba(32, 0, 82, 0.3) 4px,
+      rgba(14, 16, 15, 0.5) 4px, rgba(14, 16, 15, 0.5) 8px
+    );
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(251, 250, 249, 0.08);
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
   box-shadow: 
-    0 4px 20px rgba(32, 0, 82, 0.1), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(251, 250, 249, 0.05);
-  border-radius: 12px;
-  padding: 1rem;
+    inset 3px 3px 0 rgba(255, 255, 255, 0.1),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    6px 6px 0 rgba(131, 110, 249, 0.3);
+  border-radius: 0;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
   position: relative;
+  image-rendering: pixelated;
 `
 
 const LeftSidebar = styled.div`
@@ -257,6 +443,7 @@ export default function Home() {
   const [selectedFaction, setSelectedFaction] = useState<number>(0)
   const [gameActive, setGameActive] = useState(false)
   const [gameStartTime, setGameStartTime] = useState(0)
+  const [showTutorial, setShowTutorial] = useState(true)
   const [isStartingGame, setIsStartingGame] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [streakData, setStreakData] = useState<StreakData>({
@@ -264,7 +451,8 @@ export default function Home() {
     gamesPlayedToday: 0,
     maxGamesPerDay: 6,
     paintingCapacity: 1,
-    lastStreakTime: ''
+    lastStreakTime: '',
+    lastPlayDate: ''
   })
   const [territoriesPaintedThisGame, setTerritoriesPaintedThisGame] = useState(0)
   const [isClearingNonce, setIsClearingNonce] = useState(false)
@@ -277,7 +465,7 @@ export default function Home() {
   const [gameMode, setGameMode] = useState<'demo' | 'real'>('demo')
   const [realRoomPlayers, setRealRoomPlayers] = useState<string[]>([])
   const [isSearchingReal, setIsSearchingReal] = useState(false)
-  const [multiplayerClient, setMultiplayerClient] = useState<MultiplayerClient | null>(null)
+  const [multiplayerClient, setMultiplayerClient] = useState<VercelMultiplayer | null>(null)
   const [wsConnected, setWsConnected] = useState(false)
   
   // Pre-defined factions
@@ -300,20 +488,20 @@ export default function Home() {
   useEffect(() => {
     if (!mounted) return
     
-    // Initialize WebSocket client
-    const client = getMultiplayerClient()
+    // Initialize Vercel-compatible multiplayer client
+    const client = getVercelMultiplayer()
     setMultiplayerClient(client)
     
     // Set up event handlers
     client.onConnectionStatusChanged = (connected: boolean) => {
       setWsConnected(connected)
-      console.log('🔌 WebSocket connection status:', connected)
+      console.log('🔌 Multiplayer connection status:', connected)
     }
     
     client.onRoomJoined = (data: RoomData) => {
       console.log('🎉 Room joined:', data)
       setCurrentRoom(data.roomId)
-      setRealRoomPlayers(data.players.map(p => p.username))
+      setRealRoomPlayers(data.players)
       setIsSearchingReal(false)
       
       // Show success toast
@@ -332,7 +520,7 @@ export default function Home() {
     
     client.onRoomUpdated = (data: RoomData) => {
       console.log('🔄 Room updated:', data)
-      setRealRoomPlayers(data.players.map(p => p.username))
+      setRealRoomPlayers(data.players)
       
       // Update search toast if searching
       const existingToast = document.querySelector('.search-toast')
@@ -382,13 +570,12 @@ export default function Home() {
       setTimeout(() => document.body.removeChild(failToast), 3000)
     }
     
-    // Connect to WebSocket server
-    client.connect().catch(console.error)
+    // Vercel multiplayer is ready immediately
+    console.log('🔌 Vercel multiplayer client initialized')
     
     // Cleanup on unmount
     return () => {
-      client.disconnect()
-      // Also cleanup any remaining popups
+      // Cleanup any remaining popups
       const existingPopup = document.getElementById('winner-popup-backdrop')
       if (existingPopup) {
         document.body.removeChild(existingPopup)
@@ -396,12 +583,7 @@ export default function Home() {
     }
   }, [mounted])
 
-  // Real-time updates
-  const { updates } = useTerritoryUpdates({
-    onTerritoryUpdate: (update) => {
-      setTerritories(prev => new Map(prev.set(update.territoryId, update.factionId)))
-    }
-  })
+  // Real-time updates - removed LiveFeed
   
 
   // Get player's faction
@@ -550,7 +732,7 @@ export default function Home() {
       console.log('Starting game transaction - using EXACT fix nonce method...')
       
       // Get latest confirmed nonce (EXACTLY like fix nonce)
-      const latestNonce = await window.ethereum.request({
+      const latestNonce = await window.ethereum?.request({
         method: 'eth_getTransactionCount',
         params: [address, 'latest']
       })
@@ -558,7 +740,7 @@ export default function Home() {
       console.log('Using nonce:', parseInt(latestNonce, 16))
       
       // Send transaction with EXACT same method as fix nonce - USE SELF ADDRESS LIKE FIX NONCE!
-      const result = await window.ethereum.request({
+      const result = await window.ethereum?.request({
         method: 'eth_sendTransaction',
         params: [{
           from: address!,
@@ -637,8 +819,8 @@ export default function Home() {
   }
   
   const handleRealMatch = () => {
-    if (!multiplayerClient || !wsConnected) {
-      alert('❌ WebSocket server not connected! Please try again in a moment.')
+    if (!multiplayerClient) {
+      alert('❌ Multiplayer client not ready! Please try again in a moment.')
       return
     }
     
@@ -693,8 +875,8 @@ export default function Home() {
   
 
   const handleLeaveRoom = () => {
-    // Leave real room via WebSocket if in real mode
-    if (gameMode === 'real' && multiplayerClient && wsConnected) {
+    // Leave real room via API if in real mode
+    if (gameMode === 'real' && multiplayerClient) {
       multiplayerClient.leaveRoom()
     }
     
@@ -996,15 +1178,17 @@ export default function Home() {
     <Container>
       <Header>
         <HeaderLeft>
-          <Title>🏰 Monad Dominion</Title>
-          <Link href="/leaderboard">
-            <LeaderboardButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              🏆 Leaderboard
-            </LeaderboardButton>
-          </Link>
+          <Title>
+            <MonadLogo>
+              <svg width="33" height="32" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.6288 0C12.0084 0 0.628906 11.3792 0.628906 15.9999C0.628906 20.6206 12.0084 32 16.6288 32C21.2492 32 32.6289 20.6204 32.6289 15.9999C32.6289 11.3794 21.2494 0 16.6288 0ZM14.1355 25.1492C12.1871 24.6183 6.94871 15.455 7.47973 13.5066C8.01075 11.5581 17.1739 6.31979 19.1222 6.8508C21.0707 7.38173 26.3091 16.5449 25.7781 18.4934C25.2471 20.4418 16.0839 25.6802 14.1355 25.1492Z" fill="#FBFAF9"/>
+              </svg>
+            </MonadLogo>
+            Monad Dominion
+          </Title>
+          <LeaderboardButton href="/leaderboard" target="_blank" rel="noopener noreferrer">
+            🏆 Leaderboard
+          </LeaderboardButton>
           
           {isConnected && (
             <ClearNonceButton
@@ -1061,32 +1245,37 @@ export default function Home() {
               ) : username ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{
-                    fontFamily: 'Inter, sans-serif',
-                    background: 'rgba(251, 250, 249, 0.1)', /* Monad Kirli Beyaz */
+                    fontFamily: "'Press Start 2P', 'Inter', monospace",
+                    background: 'repeating-linear-gradient(45deg, #200052 0px, #200052 4px, #0E100F 4px, #0E100F 8px)',
                     backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(251, 250, 249, 0.2)',
-                    color: '#FBFAF9', /* Monad Kirli Beyaz */
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    fontWeight: '500', /* Inter Medium */
-                    boxShadow: '0 2px 12px rgba(32, 0, 82, 0.15)'
+                    border: '3px solid #836EF9',
+                    color: '#FBFAF9',
+                    padding: '10px 16px',
+                    borderRadius: '0',
+                    fontSize: '12px',
+                    fontWeight: '400',
+                    boxShadow: 'inset 2px 2px 0 rgba(255, 255, 255, 0.2), 4px 4px 0 rgba(131, 110, 249, 0.4)',
+                    imageRendering: 'pixelated' as any,
+                    lineHeight: '1.6'
                   }}>
                     👤 {username}
                   </div>
                   <button
                     onClick={() => setShowUsernameInput(true)}
                     style={{
-                      fontFamily: 'Inter, sans-serif',
-                      background: 'rgba(14, 16, 15, 0.4)', /* Monad Siyahı */
-                      border: '1px solid rgba(251, 250, 249, 0.2)',
-                      borderRadius: '8px',
-                      color: '#FBFAF9', /* Monad Kirli Beyaz */
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '500', /* Inter Medium */
+                      fontFamily: "'Press Start 2P', 'Inter', monospace",
+                      background: 'repeating-linear-gradient(0deg, #A0055D 0px, #A0055D 2px, #C0076F 2px, #C0076F 4px)',
+                      border: '3px solid',
+                      borderColor: '#FBFAF9 #8B0451 #8B0451 #FBFAF9',
+                      borderRadius: '0',
+                      color: '#FBFAF9',
+                      padding: '10px 16px',
+                      fontSize: '11px',
+                      fontWeight: '400',
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease'
+                      transition: 'none',
+                      boxShadow: 'inset 2px 2px 0 rgba(255, 255, 255, 0.3), 4px 4px 0 #8B0451',
+                      imageRendering: 'pixelated' as any
                     }}
                   >
                     Change
@@ -1099,17 +1288,20 @@ export default function Home() {
                 <button
                   onClick={handleFindMatch}
                   style={{
-                    fontFamily: 'Inter, sans-serif',
-                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', /* Blue gradient */
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '8px',
+                    fontFamily: "'Press Start 2P', 'Inter', monospace",
+                    background: 'repeating-linear-gradient(0deg, #2196F3 0px, #2196F3 2px, #42A5F5 2px, #42A5F5 4px)',
+                    border: '4px solid',
+                    borderColor: '#FBFAF9 #1976D2 #1976D2 #FBFAF9',
+                    borderRadius: '0',
                     color: '#FFFFFF',
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '700', /* Inter Bold */
+                    padding: '12px 20px',
+                    fontSize: '12px',
+                    fontWeight: '400',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(33, 150, 243, 0.4)',
-                    transition: 'all 0.2s ease'
+                    boxShadow: 'inset 3px 3px 0 rgba(255, 255, 255, 0.3), 6px 6px 0 #1976D2',
+                    transition: 'none',
+                    letterSpacing: '1px',
+                    imageRendering: 'pixelated' as any
                   }}
                 >
                   🎯 Find Match
@@ -1117,20 +1309,23 @@ export default function Home() {
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{
-                    fontFamily: 'Inter, sans-serif',
-                    background: 'rgba(131, 110, 249, 0.15)', /* Monad Moru - subtle */
+                    fontFamily: "'Press Start 2P', 'Inter', monospace",
+                    background: 'repeating-linear-gradient(45deg, #836EF9 0px, #836EF9 4px, #9B8BF9 4px, #9B8BF9 8px)',
                     backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(131, 110, 249, 0.3)',
-                    color: '#FBFAF9', /* Monad Kirli Beyaz */
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    fontWeight: '500', /* Inter Medium */
-                    boxShadow: '0 2px 12px rgba(131, 110, 249, 0.2)'
+                    border: '3px solid #FBFAF9',
+                    color: '#FBFAF9',
+                    padding: '10px 16px',
+                    borderRadius: '0',
+                    fontSize: '11px',
+                    fontWeight: '400',
+                    boxShadow: 'inset 2px 2px 0 rgba(255, 255, 255, 0.3), 4px 4px 0 rgba(131, 110, 249, 0.4)',
+                    imageRendering: 'pixelated' as any,
+                    lineHeight: '1.6',
+                    letterSpacing: '1px'
                   }}>
                     {gameMode === 'real' ? '👥' : '🏆'} {currentRoom}
                     {gameMode === 'real' && realRoomPlayers.length > 0 && (
-                      <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '2px' }}>
+                      <div style={{ fontSize: '9px', opacity: 0.9, marginTop: '4px' }}>
                         {realRoomPlayers.length}/4 players
                       </div>
                     )}
@@ -1138,17 +1333,20 @@ export default function Home() {
                   <button
                     onClick={handleLeaveRoom}
                     style={{
-                      fontFamily: 'Inter, sans-serif',
-                      background: 'linear-gradient(135deg, #FF5722 0%, #D32F2F 100%)', /* Red gradient */
-                      border: '2px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '8px',
+                      fontFamily: "'Press Start 2P', 'Inter', monospace",
+                      background: 'repeating-linear-gradient(0deg, #FF5722 0px, #FF5722 2px, #FF7043 2px, #FF7043 4px)',
+                      border: '4px solid',
+                      borderColor: '#FBFAF9 #D32F2F #D32F2F #FBFAF9',
+                      borderRadius: '0',
                       color: '#FFFFFF',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '700', /* Inter Bold */
+                      padding: '12px 20px',
+                      fontSize: '12px',
+                      fontWeight: '400',
                       cursor: 'pointer',
-                      boxShadow: '0 4px 16px rgba(255, 87, 34, 0.4)',
-                      transition: 'all 0.2s ease'
+                      boxShadow: 'inset 3px 3px 0 rgba(255, 255, 255, 0.3), 6px 6px 0 #D32F2F',
+                      transition: 'none',
+                      letterSpacing: '1px',
+                      imageRendering: 'pixelated' as any
                     }}
                   >
                     🚪 Leave
@@ -1187,13 +1385,15 @@ export default function Home() {
 
         <MapContainer>
           <div style={{
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '0.875rem',
-            fontWeight: '600',
+            fontFamily: "'Press Start 2P', 'Inter', monospace",
+            fontSize: '13px',
+            fontWeight: '400',
             color: '#FBFAF9',
-            textShadow: '0 0 12px rgba(131, 110, 249, 0.4)',
-            marginBottom: '0.75rem',
-            letterSpacing: '-0.01em'
+            textShadow: '3px 3px 0 #836EF9, 5px 5px 0 rgba(131, 110, 249, 0.5)',
+            marginBottom: '1rem',
+            letterSpacing: '1px',
+            imageRendering: 'pixelated' as any,
+            lineHeight: '1.6'
           }}>
             🗺️ Battle Map • {Object.keys(territories).length} Territories Claimed
           </div>
@@ -1240,8 +1440,6 @@ export default function Home() {
                   }}>
                     🎨 <strong>{territoriesPaintedThisGame}/{streakData.paintingCapacity}</strong> painted
                   </div>
-                  
-                  <LiveFeed updates={updates} />
                 </>
               )}
             </>
@@ -1303,7 +1501,7 @@ export default function Home() {
               fontSize: '0.8rem',
               color: 'rgba(251, 250, 249, 0.8)'
             }}>
-              {wsConnected ? '🟢' : '🔴'} <strong>WebSocket:</strong> {wsConnected ? 'Connected to real multiplayer server' : 'Connecting to server...'}
+              {wsConnected ? '🟢' : '🔴'} <strong>Multiplayer:</strong> {wsConnected ? 'Connected to real multiplayer server' : 'Connecting to server...'}
             </div>
             
             <div style={{
@@ -1347,33 +1545,27 @@ export default function Home() {
               
               <button
                 onClick={handleRealMatch}
-                disabled={!wsConnected}
                 style={{
                   fontFamily: 'Inter, sans-serif',
-                  background: wsConnected ? 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' : 'linear-gradient(135deg, #9E9E9E 0%, #757575 100%)',
+                  background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
                   border: '2px solid rgba(255, 255, 255, 0.3)',
                   borderRadius: '12px',
                   color: '#FFFFFF',
                   padding: '1.5rem 1rem',
                   fontSize: '0.9rem',
                   fontWeight: '600',
-                  cursor: wsConnected ? 'pointer' : 'not-allowed',
-                  boxShadow: wsConnected ? '0 4px 16px rgba(255, 152, 0, 0.4)' : '0 4px 16px rgba(158, 158, 158, 0.4)',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(255, 152, 0, 0.4)',
                   transition: 'all 0.2s ease',
-                  textAlign: 'center',
-                  opacity: wsConnected ? 1 : 0.6
+                  textAlign: 'center'
                 }}
                 onMouseEnter={(e) => {
-                  if (wsConnected) {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 152, 0, 0.6)'
-                  }
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 152, 0, 0.6)'
                 }}
                 onMouseLeave={(e) => {
-                  if (wsConnected) {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 152, 0, 0.4)'
-                  }
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 152, 0, 0.4)'
                 }}
               >
                 <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👥</div>
@@ -1410,6 +1602,79 @@ export default function Home() {
             </button>
           </div>
         </div>
+      )}
+      
+      {/* Tutorial Popup */}
+      {showTutorial && (
+        <TutorialOverlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <TutorialModal
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <TutorialCloseButton onClick={() => setShowTutorial(false)}>
+              ×
+            </TutorialCloseButton>
+            
+            <TutorialTitle>🎮 Monad Dominion Tutorial</TutorialTitle>
+            
+            <TutorialStep>
+              <TutorialStepTitle>1. Cüzdanınızı Aktive Edin</TutorialStepTitle>
+              <TutorialStepText>
+                Monad Testnet cüzdanınızı aktive ederek oyuna katılın.
+              </TutorialStepText>
+            </TutorialStep>
+            
+            <TutorialStep>
+              <TutorialStepTitle>2. Kullanıcı Adı Belirleyin</TutorialStepTitle>
+              <TutorialStepText>
+                3–20 karakter arasında bir isim seçerek oyun içindeki kimliğinizi oluşturun.
+              </TutorialStepText>
+            </TutorialStep>
+            
+            <TutorialStep>
+              <TutorialStepTitle>3. Oyun Odasına Katılın</TutorialStepTitle>
+              <TutorialStepText>
+                Rastgele bir oyun odasına girin ve kendinize bir takım seçin.
+              </TutorialStepText>
+            </TutorialStep>
+            
+            <TutorialStep>
+              <TutorialStepTitle>4. Ödüller İçin Mücadeleye Başlayın</TutorialStepTitle>
+              <TutorialStepText>
+                Haritadaki herhangi bir bölgeyi ele geçirmek için tıklayın.
+                ⚠️ Unutmayın: Bir bölgeyi aldıktan sonra geri dönemezsiniz. Yeni hak kazanabilmek için sürenin dolmasını beklemelisiniz.
+              </TutorialStepText>
+            </TutorialStep>
+            
+            <TutorialStep>
+              <TutorialStepTitle>5. Liderlik Tablosunu Kontrol Edin</TutorialStepTitle>
+              <TutorialStepText>
+                Takımınızın ve kendi sıralamanızın durumunu gerçek zamanlı olarak görebilirsiniz.
+              </TutorialStepText>
+            </TutorialStep>
+            
+            <TutorialStep>
+              <TutorialStepTitle>6. Streak Sistemi ile Avantaj Kazanın</TutorialStepTitle>
+              <TutorialStepText>
+                Günlük streak'inizi sürdürerek ekstra tıklama hakları elde edebilirsiniz. Daha fazla streak → daha fazla bölge ele geçirme kapasitesi.
+              </TutorialStepText>
+            </TutorialStep>
+            
+            <TutorialStep>
+              <TutorialStepTitle>7. Takımınızı Destekleyin ve Haritayı Fethedin</TutorialStepTitle>
+              <TutorialStepText>
+                Takım arkadaşlarınızla birlikte, bölgeleri ele geçirin ve ödülleri kazanın. NFT ödülleri, kazanan fraksiyon üyelerine dağıtılır.
+              </TutorialStepText>
+            </TutorialStep>
+          </TutorialModal>
+        </TutorialOverlay>
       )}
     </Container>
   )

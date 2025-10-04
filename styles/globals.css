@@ -1,28 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
+/* 🎮 PIXEL ART MONAD DOMINION - ULTIMATE RETRO DESIGN 🎮 */
 
 * {
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  /* PIXEL PERFECT RENDERING - CRITICAL FOR PIXEL ART */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+html,
 body {
-  background: #200052; /* Monad Mavisi - Ana Arka Plan */
-  color: #FBFAF9; /* Monad Kirli Beyaz - Ana Metin */
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
+  font-family: 'Press Start 2P', 'Inter', 'Courier New', monospace;
   font-weight: 400;
-  line-height: 1.6;
+  font-size: 14px; /* LARGER pixel font - readable! */
+  line-height: 1.8;
+  background: #0E100F; /* Monad Black - Base */
+  color: #FBFAF9; /* Monad Off-White */
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Pixel art text rendering - NO ANTI-ALIASING */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
 }
 
-/* Liquid Glass Background Effect - Monad Colors */
+/* 🎮 PIXEL ART BACKGROUND - TRUE 8-BIT RETRO STYLE 🎮 */
 body::before {
   content: '';
   position: fixed;
@@ -30,128 +39,343 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(131, 110, 249, 0.15) 0%, transparent 60%), /* Monad Moru */
-    radial-gradient(circle at 80% 20%, rgba(160, 5, 93, 0.1) 0%, transparent 60%), /* Monad Böğürtleni */
-    radial-gradient(circle at 40% 40%, rgba(251, 250, 249, 0.03) 0%, transparent 70%); /* Monad Kirli Beyaz */
+  background-image: 
+    /* MAIN PIXEL GRID - 4x4 pixels */
+    repeating-linear-gradient(
+      0deg,
+      #0E100F 0px,
+      #0E100F 4px,
+      #1A1C1B 4px,
+      #1A1C1B 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #0E100F 0px,
+      #0E100F 4px,
+      #1A1C1B 4px,
+      #1A1C1B 8px
+    ),
+    /* LARGE PIXEL BLOCKS - Monad Purple */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 16px,
+      rgba(131, 110, 249, 0.08) 16px,
+      rgba(131, 110, 249, 0.08) 32px
+    ),
+    /* DIAGONAL PIXEL PATTERN - Monad Berry */
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      transparent 24px,
+      rgba(160, 5, 93, 0.05) 24px,
+      rgba(160, 5, 93, 0.05) 28px,
+      transparent 28px,
+      transparent 48px
+    ),
+    /* BASE GRADIENT - Monad Blue to Black */
+    radial-gradient(ellipse at center, #200052 0%, #0E100F 100%);
+  background-size: 
+    8px 8px,
+    8px 8px,
+    32px 32px,
+    48px 48px,
+    100% 100%;
   pointer-events: none;
   z-index: -1;
-  animation: liquidFloat 25s ease-in-out infinite;
+  animation: pixelShift 30s linear infinite;
 }
 
-@keyframes liquidFloat {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.7;
+@keyframes pixelShift {
+  0% { background-position: 0 0, 0 0, 0 0, 0 0, center; }
+  100% { background-position: 8px 8px, 8px 8px, 32px 32px, 48px 48px, center; }
+}
+
+/* 🎮 PIXEL ART UTILITY CLASSES - TRUE RETRO STYLE 🎮 */
+
+/* PIXEL BORDER - Chunky 8-bit style */
+.pixel-border {
+  border: 4px solid #FBFAF9;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* PIXEL SHADOW - Hard-edged retro shadow */
+.pixel-shadow {
+  box-shadow: 
+    4px 0 0 #836EF9,
+    0 4px 0 #836EF9,
+    4px 4px 0 #836EF9,
+    8px 8px 0 rgba(131, 110, 249, 0.6);
+}
+
+/* PIXEL GLOW - Stepped glow effect */
+.pixel-glow {
+  box-shadow: 
+    0 0 0 2px #836EF9,
+    0 0 0 4px #A0055D,
+    0 0 0 6px rgba(131, 110, 249, 0.5),
+    0 0 16px rgba(131, 110, 249, 0.4);
+}
+
+/* 🎮 PIXEL BUTTONS - TRUE RETRO 8-BIT STYLE 🎮 */
+.pixel-button {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #836EF9 0px,
+      #836EF9 2px,
+      #9B8BF9 2px,
+      #9B8BF9 4px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  color: #FBFAF9;
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  font-size: 14px; /* BIGGER! */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 16px 28px; /* BIGGER padding! */
+  cursor: pointer;
+  transition: none;
+  position: relative;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    6px 6px 0 #200052;
+  image-rendering: pixelated;
+}
+
+.pixel-button:hover {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #9B8BF9 0px,
+      #9B8BF9 2px,
+      #A0055D 2px,
+      #A0055D 4px
+    );
+  border-color: #FFFFFF #836EF9 #836EF9 #FFFFFF;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.5),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+    4px 4px 0 #A0055D,
+    8px 8px 0 rgba(160, 5, 93, 0.4);
+}
+
+.pixel-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 
+    inset 2px 2px 0 rgba(0, 0, 0, 0.3),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* 🎮 PIXEL PANELS - TRUE RETRO 8-BIT WINDOWS 🎮 */
+.pixel-panel {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px,
+      #200052 4px,
+      #0E100F 4px,
+      #0E100F 8px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+    4px 4px 0 #836EF9,
+    8px 8px 0 rgba(131, 110, 249, 0.3);
+  position: relative;
+  image-rendering: pixelated;
+}
+
+.pixel-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #836EF9 0px,
+    #836EF9 4px,
+    #9B8BF9 4px,
+    #9B8BF9 8px
+  );
+  border-bottom: 2px solid #FBFAF9;
+}
+
+/* 🎮 PIXEL TEXT STYLES - TRUE RETRO TYPOGRAPHY 🎮 */
+.pixel-title {
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  font-size: 24px; /* BIGGER! */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #FBFAF9;
+  text-shadow: 
+    4px 0 0 #836EF9,
+    0 4px 0 #836EF9,
+    4px 4px 0 #836EF9,
+    8px 8px 0 #200052;
+  line-height: 1.6;
+  image-rendering: pixelated;
+}
+
+.pixel-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  font-size: 16px; /* BIGGER! */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #836EF9;
+  text-shadow: 
+    3px 3px 0 rgba(0, 0, 0, 0.8);
+  line-height: 1.6;
+  image-rendering: pixelated;
+}
+
+.pixel-text {
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  font-size: 12px; /* BIGGER! */
+  color: #FBFAF9;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8);
+  line-height: 1.8;
+  image-rendering: pixelated;
+}
+
+/* 🎮 PIXEL ANIMATIONS - TRUE RETRO EFFECTS 🎮 */
+@keyframes pixelBlink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes pixelBounce {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-8px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-4px); }
+}
+
+@keyframes pixelGlow {
+  0%, 100% { 
+    box-shadow: 
+      0 0 0 2px #836EF9,
+      0 0 0 4px rgba(131, 110, 249, 0.5),
+      4px 4px 0 #200052;
   }
-  50% {
-    transform: scale(1.1) rotate(180deg);
-    opacity: 0.9;
+  50% { 
+    box-shadow: 
+      0 0 0 2px #A0055D,
+      0 0 0 4px rgba(160, 5, 93, 0.5),
+      0 0 0 6px rgba(131, 110, 249, 0.3),
+      4px 4px 0 #200052,
+      8px 8px 0 rgba(160, 5, 93, 0.3);
   }
 }
 
+@keyframes pixelPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.pixel-blink { animation: pixelBlink 1s steps(2, end) infinite; }
+.pixel-bounce { animation: pixelBounce 0.8s steps(4, end) infinite; }
+.pixel-glow-anim { animation: pixelGlow 2s ease-in-out infinite; }
+.pixel-pulse { animation: pixelPulse 1.5s ease-in-out infinite; }
+
+/* 🎮 SCROLLBAR - PIXEL PERFECT STYLE 🎮 */
+::-webkit-scrollbar {
+  width: 16px;
+  image-rendering: pixelated;
+}
+
+::-webkit-scrollbar-track {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #0E100F 0px,
+      #0E100F 4px,
+      #1A1C1B 4px,
+      #1A1C1B 8px
+    );
+  border: 2px solid #836EF9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #836EF9 0px,
+      #836EF9 4px,
+      #9B8BF9 4px,
+      #9B8BF9 8px
+    );
+  border: 2px solid;
+  border-color: #FBFAF9 #200052 #200052 #FBFAF9;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #9B8BF9 0px,
+      #9B8BF9 4px,
+      #A0055D 4px,
+      #A0055D 8px
+    );
+}
+
+/* LINKS */
 a {
   color: inherit;
   text-decoration: none;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-/* Monad Glass Morphism Utility Classes */
-.glass-light {
-  background: rgba(251, 250, 249, 0.1); /* Monad Kirli Beyaz */
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(251, 250, 249, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(32, 0, 82, 0.3), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.glass-dark {
-  background: rgba(14, 16, 15, 0.4); /* Monad Siyahı */
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(251, 250, 249, 0.1);
-  box-shadow: 
-    0 8px 32px rgba(32, 0, 82, 0.4),
-    inset 0 1px 0 rgba(251, 250, 249, 0.1);
-}
-
-.glass-accent {
-  background: rgba(131, 110, 249, 0.15); /* Monad Moru */
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(131, 110, 249, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(131, 110, 249, 0.2),
-    inset 0 1px 0 rgba(251, 250, 249, 0.2);
-}
-
-.glass-secondary {
-  background: rgba(160, 5, 93, 0.15); /* Monad Böğürtleni */
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(160, 5, 93, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(160, 5, 93, 0.2),
-    inset 0 1px 0 rgba(251, 250, 249, 0.2);
-}
-
-/* RainbowKit - Official Monad Theme */
+/* 🎮 RAINBOWKIT - PIXEL PERFECT THEME 🎮 */
 [data-rk] {
-  /* Ana Vurgu - Monad Moru */
   --rk-colors-accentColor: #836EF9;
   --rk-colors-accentColorForeground: #FBFAF9;
   --rk-colors-connectButtonBackground: #836EF9;
-  --rk-colors-connectionIndicator: #836EF9;
-  --rk-colors-selectedOptionBorder: #836EF9;
-  --rk-colors-standby: #836EF9;
-  
-  /* İkincil Vurgu - Monad Böğürtleni */
-  --rk-colors-connectButtonBackgroundError: #A0055D;
-  --rk-colors-error: #A0055D;
-  
-  /* Ana Arka Plan - Monad Mavisi */
-  --rk-colors-modalBackground: #200052;
-  --rk-colors-modalBackdrop: rgba(32, 0, 82, 0.9);
-  
-  /* Metin - Monad Kirli Beyaz */
   --rk-colors-connectButtonText: #FBFAF9;
-  --rk-colors-connectButtonTextError: #FBFAF9;
+  --rk-colors-modalBackground: #200052;
+  --rk-colors-modalBackdrop: rgba(14, 16, 15, 0.95);
   --rk-colors-modalText: #FBFAF9;
   --rk-colors-modalTextSecondary: rgba(251, 250, 249, 0.8);
-  --rk-colors-modalTextDim: rgba(251, 250, 249, 0.6);
-  --rk-colors-profileForeground: rgba(251, 250, 249, 0.6);
-  
-  /* Kenarlıklar ve Arka Planlar */
-  --rk-colors-actionButtonBorder: rgba(251, 250, 249, 0.2);
-  --rk-colors-actionButtonBorderMobile: rgba(251, 250, 249, 0.2);
-  --rk-colors-generalBorder: rgba(251, 250, 249, 0.2);
-  --rk-colors-generalBorderDim: rgba(251, 250, 249, 0.1);
-  --rk-colors-modalBorder: rgba(251, 250, 249, 0.2);
-  
-  /* İnteraktif Elementler */
-  --rk-colors-actionButtonSecondaryBackground: rgba(251, 250, 249, 0.1);
-  --rk-colors-connectButtonInnerBackground: rgba(251, 250, 249, 0.1);
-  --rk-colors-menuItemBackground: rgba(251, 250, 249, 0.1);
-  --rk-colors-menuItemBackgroundHover: rgba(251, 250, 249, 0.2);
-  --rk-colors-profileAction: rgba(251, 250, 249, 0.1);
-  --rk-colors-profileActionHover: rgba(251, 250, 249, 0.2);
-  
-  /* Kontrol Elementleri */
-  --rk-colors-closeButton: rgba(251, 250, 249, 0.6);
-  --rk-colors-closeButtonBackground: rgba(251, 250, 249, 0.1);
+  --rk-colors-generalBorder: #836EF9;
+  --rk-colors-menuItemBackground: rgba(131, 110, 249, 0.15);
+  --rk-colors-menuItemBackgroundHover: rgba(131, 110, 249, 0.3);
+  --rk-fonts-body: 'Press Start 2P', monospace;
+  --rk-radii-actionButton: 0px;
+  --rk-radii-connectButton: 0px;
+  --rk-radii-menuButton: 0px;
+  --rk-radii-modal: 0px;
+  font-size: 14px; /* BIGGER! */
+  image-rendering: pixelated;
+}
+
+/* Make RainbowKit buttons pixel perfect */
+[data-rk] button {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 13px !important; /* BIGGER! */
+  padding: 12px 20px !important; /* BIGGER! */
+  border: 4px solid !important;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9 !important;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    6px 6px 0 #200052 !important;
+  transition: none !important;
+  image-rendering: pixelated !important;
 }

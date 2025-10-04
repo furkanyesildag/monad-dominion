@@ -7,13 +7,28 @@ import { useState, useEffect } from 'react'
 
 const Container = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-  color: white;
-  font-family: 'Inter', sans-serif;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #0E100F 0px, #0E100F 4px,
+      #1A1C1B 4px, #1A1C1B 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #0E100F 0px, #0E100F 4px,
+      #1A1C1B 4px, #1A1C1B 8px
+    ),
+    radial-gradient(ellipse at center, #200052 0%, #0E100F 100%);
+  background-size: 8px 8px, 8px 8px, 100% 100%;
+  color: #FBFAF9;
+  font-family: 'Press Start 2P', 'Inter', monospace;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 `
 
 const Header = styled.header`
@@ -23,65 +38,102 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 4px solid #836EF9;
   margin-bottom: 2rem;
+  box-shadow: 0 4px 0 rgba(131, 110, 249, 0.3);
 `
 
 const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: bold;
-  background: linear-gradient(45deg, #FFD700, #FFA500, #FFC107);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 3s ease infinite;
-  
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 24px;
+  font-weight: 400;
+  color: #FBFAF9;
+  text-shadow: 
+    3px 3px 0 #836EF9,
+    6px 6px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 2px;
+  line-height: 1.6;
+  image-rendering: pixelated;
+  margin: 0;
 `
 
 const BackButton = styled(motion.button)`
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #836EF9 0px, #836EF9 2px,
+      #9B8BF9 2px, #9B8BF9 4px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  color: #FBFAF9;
+  font-weight: 400;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 20px;
   cursor: pointer;
+  transition: none;
+  position: relative;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    4px 4px 0 #200052;
+  image-rendering: pixelated;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translate(2px, 2px);
+    box-shadow: 
+      inset 3px 3px 0 rgba(255, 255, 255, 0.4),
+      inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+      2px 2px 0 #200052;
+  }
+  
+  &:active {
+    transform: translate(4px, 4px);
+    box-shadow: 
+      inset 4px 4px 0 rgba(0, 0, 0, 0.5),
+      inset -4px -4px 0 rgba(255, 255, 255, 0.2),
+      1px 1px 0 #200052;
   }
 `
 
 const MainContent = styled.div`
   width: 100%;
   max-width: 800px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+    6px 6px 0 rgba(131, 110, 249, 0.3);
   padding: 2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  image-rendering: pixelated;
 `
 
 const LeaderboardTitle = styled.h2`
-  font-size: 2rem;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 16px;
+  font-weight: 400;
   text-align: center;
   margin-bottom: 1rem;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 3s ease infinite;
+  color: #FBFAF9;
+  text-shadow: 
+    2px 2px 0 #836EF9,
+    4px 4px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  image-rendering: pixelated;
 `
 
 const PlayerList = styled.div`
@@ -94,34 +146,60 @@ const PlayerList = styled.div`
 const PlayerItem = styled(motion.div)<{ rank: number }>`
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(14, 16, 15, 0.3) 0px, rgba(14, 16, 15, 0.3) 2px,
+      rgba(32, 0, 82, 0.2) 2px, rgba(32, 0, 82, 0.2) 4px
+    );
+  border: 3px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    4px 4px 0 rgba(131, 110, 249, 0.2);
   padding: 1rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
+  image-rendering: pixelated;
   
   ${props => props.rank === 1 && `
-    background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.02) 100%);
-    border-color: #FFD700;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    background: 
+      repeating-linear-gradient(
+        45deg,
+        rgba(255, 215, 0, 0.2) 0px, rgba(255, 215, 0, 0.2) 2px,
+        rgba(255, 165, 0, 0.1) 2px, rgba(255, 165, 0, 0.1) 4px
+      );
+    border-color: #FFD700 #FFA500 #FFA500 #FFD700;
+    box-shadow: 
+      inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+      inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+      4px 4px 0 rgba(255, 215, 0, 0.3);
   `}
   ${props => props.rank === 2 && `
-    background: linear-gradient(90deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.02) 100%);
-    border-color: #C0C0C0;
-    box-shadow: 0 0 15px rgba(192, 192, 192, 0.3);
+    background: 
+      repeating-linear-gradient(
+        45deg,
+        rgba(192, 192, 192, 0.2) 0px, rgba(192, 192, 192, 0.2) 2px,
+        rgba(169, 169, 169, 0.1) 2px, rgba(169, 169, 169, 0.1) 4px
+      );
+    border-color: #C0C0C0 #A9A9A9 #A9A9A9 #C0C0C0;
   `}
   ${props => props.rank === 3 && `
-    background: linear-gradient(90deg, rgba(205,127,50,0.1) 0%, rgba(205,127,50,0.02) 100%);
-    border-color: #CD7F32;
-    box-shadow: 0 0 10px rgba(205, 127, 50, 0.2);
+    background: 
+      repeating-linear-gradient(
+        45deg,
+        rgba(205, 127, 50, 0.2) 0px, rgba(205, 127, 50, 0.2) 2px,
+        rgba(184, 115, 51, 0.1) 2px, rgba(184, 115, 51, 0.1) 4px
+      );
+    border-color: #CD7F32 #B87333 #B87333 #CD7F32;
   `}
 `
 
 const RankBadge = styled.div<{ rank: number }>`
-  font-size: 1.8rem;
-  font-weight: bold;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 18px;
+  font-weight: 400;
   margin-right: 1.5rem;
   width: 40px;
   text-align: center;
@@ -133,7 +211,8 @@ const RankBadge = styled.div<{ rank: number }>`
       default: return 'rgba(255, 255, 255, 0.6)';
     }
   }};
-  text-shadow: ${props => props.rank <= 3 ? `0 0 10px ${props.color}80` : 'none'};
+  text-shadow: ${props => props.rank <= 3 ? `2px 2px 0 rgba(0, 0, 0, 0.8)` : '1px 1px 0 rgba(0, 0, 0, 0.8)'};
+  image-rendering: pixelated;
 `
 
 const PlayerDetails = styled.div`
@@ -141,60 +220,106 @@ const PlayerDetails = styled.div`
 `
 
 const PlayerAddress = styled.h3`
-  font-size: 1.4rem;
-  margin-bottom: 0.3rem;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: #FBFAF9;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+  image-rendering: pixelated;
 `
 
 const FactionSymbol = styled.span`
-  font-size: 1.5rem;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 16px;
+  image-rendering: pixelated;
 `
 
 const PlayerInfo = styled.p`
-  font-size: 0.85rem;
-  opacity: 0.7;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 8px;
+  font-weight: 400;
+  opacity: 0.8;
   margin-bottom: 0.5rem;
+  color: #FBFAF9;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  image-rendering: pixelated;
+  line-height: 1.6;
 `
 
 const PlayerStats = styled.div`
   display: flex;
   gap: 1rem;
-  font-size: 0.9rem;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 8px;
   opacity: 0.9;
+  image-rendering: pixelated;
 `
 
 const StatCard = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(14, 16, 15, 0.4) 0px, rgba(14, 16, 15, 0.4) 2px,
+      rgba(32, 0, 82, 0.3) 2px, rgba(32, 0, 82, 0.3) 4px
+    );
+  border: 2px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
+  box-shadow: 
+    inset 1px 1px 0 rgba(255, 255, 255, 0.2),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3),
+    2px 2px 0 rgba(131, 110, 249, 0.2);
   padding: 0.8rem 1.2rem;
   text-align: center;
   min-width: 120px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  image-rendering: pixelated;
 `
 
 const StatValue = styled.div`
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 16px;
+  font-weight: 400;
   color: #95E1D3;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+  image-rendering: pixelated;
 `
 
 const StatLabel = styled.div`
-  font-size: 0.75rem;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 8px;
+  font-weight: 400;
+  color: rgba(251, 250, 249, 0.8);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  image-rendering: pixelated;
   opacity: 0.6;
   text-transform: uppercase;
 `
 
 const NFTBadge = styled.div`
-  background: linear-gradient(45deg, #FFD700, #FFA500);
-  color: black;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #FFD700 0px, #FFD700 2px,
+      #FFA500 2px, #FFA500 4px
+    );
+  color: #0E100F;
   padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border: 2px solid;
+  border-color: #FFD700 #FFA500 #FFA500 #FFD700;
+  box-shadow: 
+    inset 1px 1px 0 rgba(255, 255, 255, 0.3),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3),
+    2px 2px 0 rgba(255, 165, 0, 0.3);
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 8px;
+  font-weight: 400;
   margin-left: 0.5rem;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+  image-rendering: pixelated;
 `
 
 // Real leaderboard data structure

@@ -13,44 +13,58 @@ interface GameTimerProps {
 }
 
 const Container = styled.div`
-  font-family: 'Inter', sans-serif;
-  background: rgba(251, 250, 249, 0.06); /* Monad Kirli Beyaz - subtle */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #200052 0px, #200052 4px,
+      #0E100F 4px, #0E100F 8px
+    );
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(251, 250, 249, 0.12);
+  border: 4px solid;
+  border-color: #FBFAF9 #836EF9 #836EF9 #FBFAF9;
   box-shadow: 
-    0 4px 24px rgba(32, 0, 82, 0.15), /* Monad Mavisi shadow */
-    inset 0 1px 0 rgba(251, 250, 249, 0.08);
-  border-radius: 8px;
-  padding: 0.75rem;
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
+    6px 6px 0 rgba(131, 110, 249, 0.3);
+  border-radius: 0;
+  padding: 1.25rem;
   text-align: center;
+  image-rendering: pixelated;
 `
 
 const Title = styled.h2`
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 700; /* Inter Bold */
-  margin-bottom: 0.5rem;
-  color: #FBFAF9; /* Monad Kirli Beyaz */
-  text-shadow: 0 0 16px rgba(131, 110, 249, 0.4); /* Monad Moru glow */
-  letter-spacing: -0.01em; /* Inter optimal spacing */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 14px; /* BIGGER! */
+  font-weight: 400;
+  margin-bottom: 1rem;
+  color: #FBFAF9;
+  text-shadow: 
+    3px 3px 0 #836EF9,
+    5px 5px 0 rgba(131, 110, 249, 0.5);
+  letter-spacing: 1px;
+  image-rendering: pixelated;
+  line-height: 1.6;
 `
 
 const TimerDisplay = styled.div<{ timeLeft: number }>`
-  font-family: 'Inter', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800; /* Inter Extra Bold */
-  margin: 0.5rem 0;
-  letter-spacing: -0.02em; /* Inter optimal spacing */
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  font-size: 32px; /* BIGGER! */
+  font-weight: 400;
+  margin: 1rem 0;
+  letter-spacing: 3px;
   color: ${props => {
-    if (props.timeLeft <= 30) return '#A0055D' /* Monad Böğürtleni - urgent */
-    if (props.timeLeft <= 60) return '#836EF9' /* Monad Moru - warning */
-    return '#FBFAF9' /* Monad Kirli Beyaz - normal */
+    if (props.timeLeft <= 30) return '#A0055D' /* Monad Berry - urgent */
+    if (props.timeLeft <= 60) return '#836EF9' /* Monad Purple - warning */
+    return '#FBFAF9' /* Monad Off-White - normal */
   }};
   text-shadow: ${props => {
-    if (props.timeLeft <= 30) return '0 0 15px rgba(160, 5, 93, 0.6)'
-    if (props.timeLeft <= 60) return '0 0 15px rgba(131, 110, 249, 0.6)'
-    return '0 0 12px rgba(251, 250, 249, 0.3)'
+    if (props.timeLeft <= 30) return '4px 4px 0 rgba(160, 5, 93, 0.8), 6px 6px 0 #200052'
+    if (props.timeLeft <= 60) return '4px 4px 0 rgba(131, 110, 249, 0.8), 6px 6px 0 #200052'
+    return '4px 4px 0 rgba(131, 110, 249, 0.5), 6px 6px 0 #200052'
   }};
+  image-rendering: pixelated;
+  line-height: 1.4;
 `
 
 const GameStatus = styled.div<{ active: boolean }>`
@@ -70,20 +84,30 @@ const GameStatus = styled.div<{ active: boolean }>`
 `
 
 const StartButton = styled(motion.button)`
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); /* Orange gradient */
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  font-family: 'Press Start 2P', 'Inter', monospace;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #FF9800 0px, #FF9800 2px,
+      #FFA500 2px, #FFA500 4px
+    );
+  border: 4px solid;
+  border-color: #FBFAF9 #FF6600 #FF6600 #FBFAF9;
+  border-radius: 0;
   color: #FFFFFF;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.8rem;
-  font-weight: 700; /* Inter Bold */
+  padding: 14px 24px; /* BIGGER! */
+  font-size: 13px; /* BIGGER! */
+  font-weight: 400;
   cursor: pointer;
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4);
-  transition: all 0.2s ease;
-  letter-spacing: -0.01em;
+  margin-top: 1rem;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255, 255, 255, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    6px 6px 0 #FF6600;
+  transition: none;
+  letter-spacing: 2px;
   text-transform: uppercase;
+  image-rendering: pixelated;
   
   &:hover:not(:disabled) {
     background: linear-gradient(135deg, #FF5722 0%, #D32F2F 100%); /* Red gradient on hover */
