@@ -1,0 +1,18 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = "lib"
+solc = "0.8.25"
+
+[rpc_endpoints]
+monad_testnet = "https://testnet-rpc.monad.xyz"
+
+[etherscan]
+monad_testnet = { key = "", url = "https://testnet.monadscan.com/" }
+
+[sourcify]
+monad_testnet = { url = "https://sourcify-api-monad.blockvision.org/" }
+
+
+
+

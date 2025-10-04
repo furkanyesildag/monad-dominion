@@ -1,0 +1,73 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  color: white;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* RainbowKit customizations */
+[data-rk] {
+  --rk-colors-accentColor: #4ECDC4;
+  --rk-colors-accentColorForeground: #000;
+  --rk-colors-actionButtonBorder: rgba(255, 255, 255, 0.1);
+  --rk-colors-actionButtonBorderMobile: rgba(255, 255, 255, 0.1);
+  --rk-colors-actionButtonSecondaryBackground: rgba(255, 255, 255, 0.05);
+  --rk-colors-closeButton: rgba(255, 255, 255, 0.6);
+  --rk-colors-closeButtonBackground: rgba(255, 255, 255, 0.1);
+  --rk-colors-connectButtonBackground: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  --rk-colors-connectButtonBackgroundError: #FF4444;
+  --rk-colors-connectButtonInnerBackground: rgba(255, 255, 255, 0.05);
+  --rk-colors-connectButtonText: #FFFFFF;
+  --rk-colors-connectButtonTextError: #FFFFFF;
+  --rk-colors-connectionIndicator: #44FF44;
+  --rk-colors-error: #FF4444;
+  --rk-colors-generalBorder: rgba(255, 255, 255, 0.1);
+  --rk-colors-generalBorderDim: rgba(255, 255, 255, 0.05);
+  --rk-colors-menuItemBackground: rgba(255, 255, 255, 0.05);
+  --rk-colors-menuItemBackgroundHover: rgba(255, 255, 255, 0.1);
+  --rk-colors-modalBackdrop: rgba(0, 0, 0, 0.5);
+  --rk-colors-modalBackground: #1a1a2e;
+  --rk-colors-modalBorder: rgba(255, 255, 255, 0.1);
+  --rk-colors-modalText: #FFFFFF;
+  --rk-colors-modalTextDim: rgba(255, 255, 255, 0.6);
+  --rk-colors-modalTextSecondary: rgba(255, 255, 255, 0.8);
+  --rk-colors-profileAction: rgba(255, 255, 255, 0.1);
+  --rk-colors-profileActionHover: rgba(255, 255, 255, 0.2);
+  --rk-colors-profileForeground: rgba(255, 255, 255, 0.6);
+  --rk-colors-selectedOptionBorder: #4ECDC4;
+  --rk-colors-standby: #FFD700;
+}
