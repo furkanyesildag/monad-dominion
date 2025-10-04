@@ -1,7 +1,7 @@
 import { createPublicClient, http, parseEther } from 'viem'
 import { mainnet } from 'viem/chains'
 
-// Monad Testnet configuration
+// Monad Testnet configuration - Official settings
 export const monadTestnet = {
   id: 10143,
   name: 'Monad Testnet',
@@ -18,17 +18,19 @@ export const monadTestnet = {
     public: {
       http: ['https://testnet-rpc.monad.xyz'],
     },
+    secondary: {
+      http: ['https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6'],
+    },
   },
   blockExplorers: {
     default: { name: 'MonadScan', url: 'https://testnet.monadscan.com' },
+    monadexplorer: { name: 'MonadExplorer', url: 'https://testnet.monadexplorer.com' },
+    socialscan: { name: 'SocialScan', url: 'https://monad-testnet.socialscan.io' },
   },
   testnet: true,
 } as const
 
-// Contract configuration - Using real Monad testnet contracts for demo
-export const CONTRACT_ADDRESS = '0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed' // CreateX contract on Monad testnet
-
-// Monad Testnet Contract Addresses
+// Monad Testnet Official Contract Addresses
 export const MONAD_CONTRACTS = {
   Multicall3: '0xcA11bde05977b3631167028862bE2a173976CA11',
   UniswapV2Factory: '0x733e88f248b742db6c14c0b1713af5ad7fdd59d0',
@@ -43,6 +45,12 @@ export const MONAD_CONTRACTS = {
   CreateX: '0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed',
   Permit2: '0x000000000022d473030f116ddee9f6b43ac78ba3'
 } as const
+
+// Use CreateX for game start transactions (real contract)
+export const CONTRACT_ADDRESS = MONAD_CONTRACTS.CreateX
+
+// Use WrappedMonad for NFT claim transactions (real contract)
+export const NFT_CONTRACT_ADDRESS = MONAD_CONTRACTS.WrappedMonad
 export const CLAIM_COST = parseEther('0.001') // 0.001 MON
 
 // Contract ABI

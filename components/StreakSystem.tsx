@@ -121,10 +121,16 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
     paintingCapacity: 1,
     lastPlayDate: ''
   })
+  const [mounted, setMounted] = useState(false)
 
-  // Load streak data from localStorage
+  // Mount component first
   useEffect(() => {
-    if (!playerAddress) return
+    setMounted(true)
+  }, [])
+
+  // Load streak data from localStorage only after mounting
+  useEffect(() => {
+    if (!mounted || !playerAddress) return
 
     const stored = localStorage.getItem(`${STORAGE_KEY}-${playerAddress}`)
     if (stored) {
@@ -157,13 +163,13 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
       setStreakData(data)
       onStreakUpdate(data)
     }
-  }, [playerAddress, onStreakUpdate])
+  }, [mounted, playerAddress, onStreakUpdate])
 
-  // Save streak data to localStorage
+  // Save streak data to localStorage only after mounting
   useEffect(() => {
-    if (!playerAddress) return
+    if (!mounted || !playerAddress) return
     localStorage.setItem(`${STORAGE_KEY}-${playerAddress}`, JSON.stringify(streakData))
-  }, [streakData, playerAddress])
+  }, [mounted, streakData, playerAddress])
 
   const incrementGamePlayed = () => {
     if (streakData.gamesPlayedToday >= streakData.maxGamesPerDay) return
@@ -202,6 +208,18 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
 
   const gamesRemaining = streakData.maxGamesPerDay - streakData.gamesPlayedToday
   const progressPercentage = (streakData.gamesPlayedToday / streakData.maxGamesPerDay) * 100
+
+  // Show loading state until mounted
+  if (!mounted) {
+    return (
+      <Container>
+        <Title>🔥 Daily Streak System</Title>
+        <div style={{ textAlign: 'center', opacity: 0.6, padding: '2rem' }}>
+          Loading streak data...
+        </div>
+      </Container>
+    )
+  }
 
   return (
     <Container>

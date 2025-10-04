@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
 interface HexGridProps {
   territories: Map<number, number>
@@ -147,6 +148,11 @@ const FactionColors = {
 }
 
 export default function HexGrid({ territories, onTerritoryClick, playerFaction }: HexGridProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   const generateHexGrid = () => {
     const rows = 10
@@ -200,10 +206,21 @@ export default function HexGrid({ territories, onTerritoryClick, playerFaction }
         fontWeight: '500',
         textAlign: 'center'
       }}>
-        🗺️ Battle Map • {territories?.size || 0} Territories Claimed
+        🗺️ Battle Map • {mounted ? (territories?.size || 0) : 0} Territories Claimed
       </div>
       <HexGridWrapper>
-        {generateHexGrid()}
+        {mounted ? generateHexGrid() : (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: '400px',
+            fontSize: '1.2rem',
+            opacity: 0.6
+          }}>
+            🔄 Loading battle map...
+          </div>
+        )}
       </HexGridWrapper>
     </GridContainer>
   )

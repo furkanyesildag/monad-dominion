@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
 interface TerritoryUpdate {
   territoryId: number
@@ -93,6 +94,12 @@ function shortenAddress(address: string): string {
 }
 
 export default function LiveFeed({ updates }: LiveFeedProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <Container>
       <Title>
@@ -124,7 +131,7 @@ export default function LiveFeed({ updates }: LiveFeedProps) {
                 <br />
                 <PlayerAddress>{shortenAddress(update.player)}</PlayerAddress>
               </UpdateText>
-              <Timestamp>{formatTimeAgo(update.timestamp)}</Timestamp>
+              <Timestamp>{mounted ? formatTimeAgo(update.timestamp) : 'Just now'}</Timestamp>
             </UpdateItem>
           )
         })}

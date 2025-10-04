@@ -17,16 +17,18 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
         name: 'Monad',
         symbol: 'MON',
       },
-      rpcUrls: {
-        default: {
-          http: ['https://testnet-rpc.monad.xyz'],
-        },
-        public: {
-          http: ['https://testnet-rpc.monad.xyz'],
-        },
+    rpcUrls: {
+      default: {
+        http: ['https://testnet-rpc.monad.xyz'],
       },
+      public: {
+        http: ['https://testnet-rpc.monad.xyz'],
+      },
+    },
       blockExplorers: {
         default: { name: 'MonadScan', url: 'https://testnet.monadscan.com' },
+        monadexplorer: { name: 'MonadExplorer', url: 'https://testnet.monadexplorer.com' },
+        socialscan: { name: 'SocialScan', url: 'https://monad-testnet.socialscan.io' },
       },
       testnet: true,
     },

@@ -214,6 +214,30 @@ export default function Leaderboard() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Show loading until mounted
+  if (!mounted) {
+    return (
+      <Container>
+        <Header>
+          <div style={{ padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+            ⬅️ Back to Game
+          </div>
+          <Title>🏆 NFT Winners Leaderboard</Title>
+          <div style={{ padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+            Loading...
+          </div>
+        </Header>
+
+        <MainContent>
+          <LeaderboardTitle>🏅 Top NFT Collectors</LeaderboardTitle>
+          <div style={{ textAlign: 'center', opacity: 0.8, marginBottom: '2rem' }}>
+            Loading leaderboard data...
+          </div>
+        </MainContent>
+      </Container>
+    )
+  }
   
   // Create leaderboard data sorted by win count
   const leaderboardData = playerStats

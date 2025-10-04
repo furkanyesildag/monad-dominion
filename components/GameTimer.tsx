@@ -97,27 +97,77 @@ const GAME_DURATION = 120 // 2 minutes
 export default function GameTimer({ gameActive, gameStartTime, onGameEnd, onStartGame, isStartingGame, gamesPlayedToday = 0, maxGamesPerDay = 6 }: GameTimerProps) {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [currentRound, setCurrentRound] = useState(1)
+  const [mounted, setMounted] = useState(false)
+  const [forceUpdate, setForceUpdate] = useState(0)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    console.log('🔥 Timer useEffect triggered:', { gameActive, gameStartTime, timeLeft })
+    
     if (!gameActive) {
+      console.log('❌ Game not active, resetting timer to', GAME_DURATION)
       setTimeLeft(GAME_DURATION)
       return
     }
 
+    if (!gameStartTime || gameStartTime === 0) {
+      console.log('⏳ No valid gameStartTime, waiting...', gameStartTime)
+      return
+    }
+
+    // Calculate initial time immediately
+    const now = Math.floor(Date.now() / 1000)
+    const elapsed = now - gameStartTime
+    const initialRemaining = Math.max(0, GAME_DURATION - elapsed)
+    
+    console.log('🚀 Setting initial timer:', { now, gameStartTime, elapsed, initialRemaining })
+    setTimeLeft(initialRemaining)
+
+    console.log('⏰ Starting timer interval...')
     const interval = setInterval(() => {
-      const now = Math.floor(Date.now() / 1000)
-      const elapsed = now - gameStartTime
-      const remaining = Math.max(0, GAME_DURATION - elapsed)
+      const currentNow = Math.floor(Date.now() / 1000)
+      const currentElapsed = currentNow - gameStartTime
+      const currentRemaining = Math.max(0, GAME_DURATION - currentElapsed)
       
-      setTimeLeft(remaining)
+      console.log('⏱️ Timer tick:', { 
+        currentNow, 
+        gameStartTime, 
+        currentElapsed, 
+        currentRemaining, 
+        gameActive,
+        difference: currentNow - gameStartTime 
+      })
       
-      if (remaining === 0) {
-        onGameEnd()
+      // Force re-render to ensure UI updates
+      setTimeLeft(currentRemaining)
+      setForceUpdate(prev => prev + 1)
+      
+      if (currentRemaining === 0) {
+        console.log('🏁 Timer finished, calling onGameEnd')
+        console.log('🔥 TIMER REACHED ZERO - CALLING GAME END!')
+        
+        // Clear interval immediately to prevent multiple calls
+        clearInterval(interval)
+        
+        // Call game end with a small delay to ensure state is updated
+        setTimeout(() => {
+          console.log('🚀 Calling onGameEnd after delay')
+          alert('⏰ TIME UP! Game ending now...')
+          onGameEnd()
+        }, 100)
+        
         setCurrentRound(prev => prev + 1)
+        return // Exit the interval
       }
     }, 1000)
 
-    return () => clearInterval(interval)
+    return () => {
+      console.log('🛑 Clearing timer interval')
+      clearInterval(interval)
+    }
   }, [gameActive, gameStartTime, onGameEnd])
 
   const formatTime = (seconds: number) => {
@@ -137,7 +187,7 @@ export default function GameTimer({ gameActive, gameStartTime, onGameEnd, onStar
       </GameStatus>
       
       <TimerDisplay timeLeft={timeLeft}>
-        {formatTime(timeLeft)}
+        {formatTime(timeLeft)} {/* Force: {forceUpdate} */}
       </TimerDisplay>
       
       {!gameActive ? (
@@ -155,7 +205,31 @@ export default function GameTimer({ gameActive, gameStartTime, onGameEnd, onStar
         <div style={{ fontSize: '1rem', opacity: 0.8, marginTop: '1rem' }}>
           {timeLeft > 60 ? '⚔️ Battle in progress!' : 
            timeLeft > 30 ? '🔥 Final minute!' : 
-           '⚡ Last seconds!'}
+           timeLeft > 0 ? '⚡ Last seconds!' :
+           <div>
+             <div style={{ color: '#FF4444', fontWeight: 'bold', marginBottom: '1rem' }}>
+               ⏰ TIME UP!
+             </div>
+             <button 
+               onClick={() => {
+                 console.log('🔴 Manual game end triggered')
+                 alert('🔴 Manually ending game...')
+                 onGameEnd()
+               }}
+               style={{
+                 background: '#FF4444',
+                 color: 'white',
+                 border: 'none',
+                 padding: '0.75rem 1.5rem',
+                 borderRadius: '8px',
+                 cursor: 'pointer',
+                 fontWeight: 'bold'
+               }}
+             >
+               🏁 End Game Now
+             </button>
+           </div>
+          }
         </div>
       )}
       
@@ -167,7 +241,9 @@ export default function GameTimer({ gameActive, gameStartTime, onGameEnd, onStar
       }}>
         {gameActive 
           ? 'Claim territories by clicking hexagons. No transaction fees during gameplay!'
-          : 'Start a new 2-minute battle round. Winner gets NFT rewards!'
+          : mounted 
+            ? 'Start a new 2-minute battle round. Winner gets NFT rewards! (Note: Monad testnet can be slow, please be patient)'
+            : 'Loading game data...'
         }
       </div>
     </Container>
