@@ -154,24 +154,31 @@ export const CONTRACT_ABI = [
 export const FACTIONS = [
   {
     id: 1,
-    name: 'Crimson Warriors',
-    symbol: '🔥',
-    description: 'Warriors of fire and blood. They seek dominance through strength and conquest.',
-    color: '#FF4444',
+    name: 'Cmty',
+    symbol: '👥',
+    description: 'Community builders',
+    color: '#836EF9',
   },
   {
     id: 2,
-    name: 'Azure Guardians',
-    symbol: '🌊',
-    description: 'Guardians of the deep blue. They protect ancient wisdom and maintain balance.',
-    color: '#4444FF',
+    name: 'Eco',
+    symbol: '🌱',
+    description: 'Ecosystem developers',
+    color: '#A0055D',
   },
   {
     id: 3,
-    name: 'Emerald Legion',
-    symbol: '🌿',
-    description: 'Masters of nature and growth. They believe in harmony and natural expansion.',
-    color: '#44FF44',
+    name: 'Dev',
+    symbol: '⚡',
+    description: 'Core developers',
+    color: '#FBFAF9',
+  },
+  {
+    id: 4,
+    name: 'Xyz',
+    symbol: '🚀',
+    description: 'Experimental pioneers',
+    color: '#0E100F',
   },
 ] as const
 

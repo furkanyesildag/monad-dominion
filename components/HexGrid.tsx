@@ -16,8 +16,8 @@ const GridContainer = styled.div`
   justify-content: center;
   align-items: center;
   overflow: auto;
-  padding: 20px;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 70%);
+  padding: 0.5rem;
+  background: radial-gradient(circle at center, rgba(131, 110, 249, 0.03) 0%, transparent 70%);
 `
 
 const HexGridWrapper = styled.div`
@@ -25,38 +25,95 @@ const HexGridWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 0px;
-  transform: scale(0.9);
-  filter: drop-shadow(0 0 20px rgba(78, 205, 196, 0.1));
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 20px rgba(131, 110, 249, 0.15));
 `
 
 const HexRow = styled.div<{ isOdd: boolean }>`
   display: flex;
-  gap: 1px;
-  margin-left: ${props => props.isOdd ? '30px' : '0px'};
-  margin-bottom: -10px;
+  gap: 2px;
+  margin-left: ${props => props.isOdd ? '23px' : '0px'};
+  margin-bottom: -8px;
+`
+
+const MonadSymbol = styled.div<{ faction: number }>`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: ${props => {
+    switch (props.faction) {
+      case 1: return 'rgba(255, 255, 255, 0.95)' // Beyaz on Moru
+      case 2: return 'rgba(255, 255, 255, 0.95)' // Beyaz on Böğürtleni
+      case 3: return 'rgba(131, 110, 249, 0.95)' // Moru on Beyaz
+      case 4: return 'rgba(251, 250, 249, 0.95)' // Beyaz on Siyah
+      default: return 'rgba(100, 100, 100, 0.8)' // Dark Gray on Unclaimed
+    }
+  }};
+  border: 1px solid ${props => {
+    switch (props.faction) {
+      case 1: return 'rgba(255, 255, 255, 0.5)'
+      case 2: return 'rgba(255, 255, 255, 0.5)'
+      case 3: return 'rgba(131, 110, 249, 0.5)'
+      case 4: return 'rgba(251, 250, 249, 0.5)'
+      default: return 'rgba(100, 100, 100, 0.4)'
+    }
+  }};
+  box-shadow: 
+    0 0 10px rgba(131, 110, 249, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 8px;
+  color: ${props => {
+    switch (props.faction) {
+      case 1: return '#836EF9' // Moru text on Beyaz circle
+      case 2: return '#A0055D' // Böğürtleni text on Beyaz circle
+      case 3: return '#FBFAF9' // Beyaz text on Moru circle
+      case 4: return '#836EF9' // Moru text on Beyaz circle
+      default: return '#FFFFFF' // White text on Gray circle
+    }
+  }};
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 2;
+  
+  &::before {
+    content: 'M';
+  }
 `
 
 const HexTile = styled(motion.div)<{ faction: number; isPlayerFaction: boolean }>`
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
   background: ${props => {
     switch (props.faction) {
       case 1: return `
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-        linear-gradient(135deg, #FF6B6B 0%, #FF4444 40%, #E63946 70%, #CC2222 100%)
-      ` // Crimson Legion
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #836EF9 0%, #7C65F8 40%, #6B5CE6 70%, #5A4DD4 100%)
+      ` // Cmty - Monad Moru
       case 2: return `
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-        linear-gradient(135deg, #4ECDC4 0%, #4895EF 40%, #4361EE 70%, #3F37C9 100%)
-      ` // Azure Order  
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #A0055D 0%, #8F0452 40%, #7E0347 70%, #6D023C 100%)
+      ` // Eco - Monad Böğürtleni
       case 3: return `
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-        linear-gradient(135deg, #95E1D3 0%, #52B788 40%, #40916C 70%, #2D6A4F 100%)
-      ` // Emerald Circle
+        radial-gradient(circle at 30% 30%, rgba(14, 16, 15, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #FBFAF9 0%, #F0EFE8 40%, #E5E4D7 70%, #DAD9C6 100%)
+      ` // Dev - Monad Kirli Beyaz
+      case 4: return `
+        radial-gradient(circle at 30% 30%, rgba(251, 250, 249, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #0E100F 0%, #1A1C1B 40%, #262827 70%, #323433 100%)
+      ` // Xyz - Monad Siyahı
       default: return `
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        linear-gradient(135deg, #6C757D 0%, #495057 40%, #343A40 70%, #212529 100%)
-      ` // Unclaimed
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
+        linear-gradient(135deg, #FFFFFF 0%, #F8F8F8 40%, #F0F0F0 70%, #E8E8E8 100%)
+      ` // Unclaimed - Pure White
     }
   }};
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
@@ -88,27 +145,10 @@ const HexTile = styled(motion.div)<{ faction: number; isPlayerFaction: boolean }
     pointer-events: none;
   }
   
-  &:after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-        width: 10px;
-        height: 10px;
-    background: ${props => {
-      switch (props.faction) {
-        case 1: return 'radial-gradient(circle, #FFD700 0%, #FFA500 100%)'
-        case 2: return 'radial-gradient(circle, #87CEEB 0%, #4682B4 100%)'
-        case 3: return 'radial-gradient(circle, #98FB98 0%, #228B22 100%)'
-        default: return 'none'
-      }
-    }};
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: ${props => props.faction > 0 ? 0.8 : 0};
-    transition: all 0.3s ease;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
   
   &:hover {
     transform: scale(1.3) translateY(-4px) rotateZ(2deg);
@@ -126,11 +166,13 @@ const HexTile = styled(motion.div)<{ faction: number; isPlayerFaction: boolean }
       }},
       inset 0 2px 0 rgba(255, 255, 255, 0.4);
       
-                &:after {
-                  width: 14px;
-                  height: 14px;
-      opacity: 1;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    ${MonadSymbol} {
+      width: 22px;
+      height: 22px;
+      font-size: 10px;
+      box-shadow: 
+        0 0 15px rgba(131, 110, 249, 0.8),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
     }
   }
   
@@ -183,7 +225,9 @@ export default function HexGrid({ territories, onTerritoryClick, playerFaction }
               duration: 0.3,
               ease: "easeOut"
             }}
-          />
+          >
+            <MonadSymbol faction={faction} />
+          </HexTile>
         )
       }
       

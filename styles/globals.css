@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
@@ -11,9 +13,41 @@ body {
 }
 
 body {
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-  color: white;
+  background: #200052; /* Monad Mavisi - Ana Arka Plan */
+  color: #FBFAF9; /* Monad Kirli Beyaz - Ana Metin */
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Liquid Glass Background Effect - Monad Colors */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(131, 110, 249, 0.15) 0%, transparent 60%), /* Monad Moru */
+    radial-gradient(circle at 80% 20%, rgba(160, 5, 93, 0.1) 0%, transparent 60%), /* Monad Böğürtleni */
+    radial-gradient(circle at 40% 40%, rgba(251, 250, 249, 0.03) 0%, transparent 70%); /* Monad Kirli Beyaz */
+  pointer-events: none;
+  z-index: -1;
+  animation: liquidFloat 25s ease-in-out infinite;
+}
+
+@keyframes liquidFloat {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    opacity: 0.9;
+  }
 }
 
 a {
@@ -39,35 +73,85 @@ a {
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* RainbowKit customizations */
+/* Monad Glass Morphism Utility Classes */
+.glass-light {
+  background: rgba(251, 250, 249, 0.1); /* Monad Kirli Beyaz */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(251, 250, 249, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(32, 0, 82, 0.3), /* Monad Mavisi shadow */
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(14, 16, 15, 0.4); /* Monad Siyahı */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(251, 250, 249, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(32, 0, 82, 0.4),
+    inset 0 1px 0 rgba(251, 250, 249, 0.1);
+}
+
+.glass-accent {
+  background: rgba(131, 110, 249, 0.15); /* Monad Moru */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(131, 110, 249, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(131, 110, 249, 0.2),
+    inset 0 1px 0 rgba(251, 250, 249, 0.2);
+}
+
+.glass-secondary {
+  background: rgba(160, 5, 93, 0.15); /* Monad Böğürtleni */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(160, 5, 93, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(160, 5, 93, 0.2),
+    inset 0 1px 0 rgba(251, 250, 249, 0.2);
+}
+
+/* RainbowKit - Official Monad Theme */
 [data-rk] {
-  --rk-colors-accentColor: #4ECDC4;
-  --rk-colors-accentColorForeground: #000;
-  --rk-colors-actionButtonBorder: rgba(255, 255, 255, 0.1);
-  --rk-colors-actionButtonBorderMobile: rgba(255, 255, 255, 0.1);
-  --rk-colors-actionButtonSecondaryBackground: rgba(255, 255, 255, 0.05);
-  --rk-colors-closeButton: rgba(255, 255, 255, 0.6);
-  --rk-colors-closeButtonBackground: rgba(255, 255, 255, 0.1);
-  --rk-colors-connectButtonBackground: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-  --rk-colors-connectButtonBackgroundError: #FF4444;
-  --rk-colors-connectButtonInnerBackground: rgba(255, 255, 255, 0.05);
-  --rk-colors-connectButtonText: #FFFFFF;
-  --rk-colors-connectButtonTextError: #FFFFFF;
-  --rk-colors-connectionIndicator: #44FF44;
-  --rk-colors-error: #FF4444;
-  --rk-colors-generalBorder: rgba(255, 255, 255, 0.1);
-  --rk-colors-generalBorderDim: rgba(255, 255, 255, 0.05);
-  --rk-colors-menuItemBackground: rgba(255, 255, 255, 0.05);
-  --rk-colors-menuItemBackgroundHover: rgba(255, 255, 255, 0.1);
-  --rk-colors-modalBackdrop: rgba(0, 0, 0, 0.5);
-  --rk-colors-modalBackground: #1a1a2e;
-  --rk-colors-modalBorder: rgba(255, 255, 255, 0.1);
-  --rk-colors-modalText: #FFFFFF;
-  --rk-colors-modalTextDim: rgba(255, 255, 255, 0.6);
-  --rk-colors-modalTextSecondary: rgba(255, 255, 255, 0.8);
-  --rk-colors-profileAction: rgba(255, 255, 255, 0.1);
-  --rk-colors-profileActionHover: rgba(255, 255, 255, 0.2);
-  --rk-colors-profileForeground: rgba(255, 255, 255, 0.6);
-  --rk-colors-selectedOptionBorder: #4ECDC4;
-  --rk-colors-standby: #FFD700;
+  /* Ana Vurgu - Monad Moru */
+  --rk-colors-accentColor: #836EF9;
+  --rk-colors-accentColorForeground: #FBFAF9;
+  --rk-colors-connectButtonBackground: #836EF9;
+  --rk-colors-connectionIndicator: #836EF9;
+  --rk-colors-selectedOptionBorder: #836EF9;
+  --rk-colors-standby: #836EF9;
+  
+  /* İkincil Vurgu - Monad Böğürtleni */
+  --rk-colors-connectButtonBackgroundError: #A0055D;
+  --rk-colors-error: #A0055D;
+  
+  /* Ana Arka Plan - Monad Mavisi */
+  --rk-colors-modalBackground: #200052;
+  --rk-colors-modalBackdrop: rgba(32, 0, 82, 0.9);
+  
+  /* Metin - Monad Kirli Beyaz */
+  --rk-colors-connectButtonText: #FBFAF9;
+  --rk-colors-connectButtonTextError: #FBFAF9;
+  --rk-colors-modalText: #FBFAF9;
+  --rk-colors-modalTextSecondary: rgba(251, 250, 249, 0.8);
+  --rk-colors-modalTextDim: rgba(251, 250, 249, 0.6);
+  --rk-colors-profileForeground: rgba(251, 250, 249, 0.6);
+  
+  /* Kenarlıklar ve Arka Planlar */
+  --rk-colors-actionButtonBorder: rgba(251, 250, 249, 0.2);
+  --rk-colors-actionButtonBorderMobile: rgba(251, 250, 249, 0.2);
+  --rk-colors-generalBorder: rgba(251, 250, 249, 0.2);
+  --rk-colors-generalBorderDim: rgba(251, 250, 249, 0.1);
+  --rk-colors-modalBorder: rgba(251, 250, 249, 0.2);
+  
+  /* İnteraktif Elementler */
+  --rk-colors-actionButtonSecondaryBackground: rgba(251, 250, 249, 0.1);
+  --rk-colors-connectButtonInnerBackground: rgba(251, 250, 249, 0.1);
+  --rk-colors-menuItemBackground: rgba(251, 250, 249, 0.1);
+  --rk-colors-menuItemBackgroundHover: rgba(251, 250, 249, 0.2);
+  --rk-colors-profileAction: rgba(251, 250, 249, 0.1);
+  --rk-colors-profileActionHover: rgba(251, 250, 249, 0.2);
+  
+  /* Kontrol Elementleri */
+  --rk-colors-closeButton: rgba(251, 250, 249, 0.6);
+  --rk-colors-closeButtonBackground: rgba(251, 250, 249, 0.1);
 }

@@ -2,6 +2,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
 import HexGrid from '../components/HexGrid'
@@ -13,21 +14,34 @@ import StreakSystem, { StreakData } from '../components/StreakSystem'
 import { useTerritoryUpdates } from '../hooks/useTerritoryUpdates'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, FACTIONS, NFT_CONTRACT_ADDRESS } from '../lib/config'
 import { sendMonadTransaction, checkBalance, isOnMonadTestnet, switchToMonadTestnet, clearStuckTransactions } from '../lib/transaction-utils'
+import { updatePlayerStats } from './leaderboard'
+import { getMultiplayerClient, MultiplayerClient, RoomData } from '../lib/websocket-client'
 
 
 const Container = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-  color: white;
+  height: 100vh;
+  background: transparent;
+  color: #FBFAF9;
   font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 `
 
 const Header = styled.header`
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(251, 250, 249, 0.08); /* Monad Kirli Beyaz - subtle */
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(251, 250, 249, 0.15);
+  box-shadow: 
+    0 4px 24px rgba(32, 0, 82, 0.2), /* Monad Mavisi shadow */
+    inset 0 1px 0 rgba(251, 250, 249, 0.1);
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
 `
 
 const HeaderLeft = styled.div`
@@ -36,7 +50,7 @@ const HeaderLeft = styled.div`
   gap: 2rem;
 `
 
-const LeaderboardButton = styled(motion.button)`
+const LeaderboardButton = styled(motion.div)`
   background: linear-gradient(45deg, #FFD700, #FFA500);
   border: none;
   border-radius: 8px;
@@ -48,6 +62,7 @@ const LeaderboardButton = styled(motion.button)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
   
   &:hover {
     transform: translateY(-2px);
@@ -79,37 +94,32 @@ const ClearNonceButton = styled(motion.button)`
 
 const RoomContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
+  border-radius: 8px;
+  padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 `
 
 const RoomTitle = styled.h3`
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
   color: #4ECDC4;
 `
 
 const RoomButtons = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 `
 
 const RoomButton = styled(motion.button)`
   background: linear-gradient(45deg, #4ECDC4, #44A08D);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 0.8rem;
   cursor: pointer;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
-  }
 `
 
 const RoomInput = styled.input`
@@ -139,35 +149,34 @@ const CurrentRoomDisplay = styled.div`
 
 const UsernameContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
+  border-radius: 8px;
+  padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
 `
 
 const UsernameTitle = styled.h3`
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
   color: #FFD700;
 `
 
 const UsernameInputGroup = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `
 
 const UsernameInput = styled.input`
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
   color: white;
-  padding: 0.75rem;
-  font-size: 1rem;
-  width: 200px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  width: 150px;
   text-align: center;
   
   &::placeholder {
@@ -178,53 +187,68 @@ const UsernameInput = styled.input`
 const UsernameDisplay = styled.div`
   background: linear-gradient(45deg, #4ECDC4, #44A08D);
   color: white;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
   font-weight: 600;
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 `
 
 const Title = styled.h1`
+  font-family: 'Inter', sans-serif;
   font-size: 2rem;
-  font-weight: bold;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 3s ease infinite;
-  
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+  font-weight: 800; /* Inter Extra Bold */
+  color: #FBFAF9; /* Monad Kirli Beyaz */
+  text-shadow: 
+    0 0 24px rgba(131, 110, 249, 0.6), /* Monad Moru glow */
+    0 2px 8px rgba(32, 0, 82, 0.4); /* Monad Mavisi depth */
+  margin: 0;
+  letter-spacing: -0.02em; /* Inter optimal spacing */
+  line-height: 1.1;
 `
 
 
 const GameArea = styled.div`
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 2rem;
-  padding: 2rem;
-  height: calc(100vh - 100px);
+  grid-template-columns: 220px 1fr 220px;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  flex: 1;
+  overflow: hidden;
 `
 
 const MapContainer = styled.div`
-  background: rgba(255, 255, 255, 0.05);
+  font-family: 'Inter', sans-serif;
+  background: rgba(251, 250, 249, 0.04); /* Monad Kirli Beyaz - very subtle */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(251, 250, 249, 0.08);
+  box-shadow: 
+    0 4px 20px rgba(32, 0, 82, 0.1), /* Monad Mavisi shadow */
+    inset 0 1px 0 rgba(251, 250, 249, 0.05);
   border-radius: 12px;
   padding: 1rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  min-height: 600px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`
-
-const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  position: relative;
+`
+
+const LeftSidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  overflow: hidden;
+`
+
+const RightSidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  overflow: hidden;
 `
 
 export default function Home() {
@@ -236,11 +260,11 @@ export default function Home() {
   const [isStartingGame, setIsStartingGame] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [streakData, setStreakData] = useState<StreakData>({
-    dailyStreak: 0,
+    minuteStreak: 0,
     gamesPlayedToday: 0,
     maxGamesPerDay: 6,
     paintingCapacity: 1,
-    lastPlayDate: ''
+    lastStreakTime: ''
   })
   const [territoriesPaintedThisGame, setTerritoriesPaintedThisGame] = useState(0)
   const [isClearingNonce, setIsClearingNonce] = useState(false)
@@ -249,12 +273,19 @@ export default function Home() {
   const [showRoomInput, setShowRoomInput] = useState(false)
   const [username, setUsername] = useState('')
   const [showUsernameInput, setShowUsernameInput] = useState(false)
+  const [showMatchmakingModal, setShowMatchmakingModal] = useState(false)
+  const [gameMode, setGameMode] = useState<'demo' | 'real'>('demo')
+  const [realRoomPlayers, setRealRoomPlayers] = useState<string[]>([])
+  const [isSearchingReal, setIsSearchingReal] = useState(false)
+  const [multiplayerClient, setMultiplayerClient] = useState<MultiplayerClient | null>(null)
+  const [wsConnected, setWsConnected] = useState(false)
   
   // Pre-defined factions
   const availableFactions = [
-    { id: 1, name: 'Crimson Warriors', symbol: '🔥', memberCount: 0, totalTerritories: 0 },
-    { id: 2, name: 'Azure Guardians', symbol: '🌊', memberCount: 0, totalTerritories: 0 },
-    { id: 3, name: 'Emerald Legion', symbol: '🌿', memberCount: 0, totalTerritories: 0 }
+    { id: 1, name: 'Cmty', symbol: '👥', memberCount: 0, totalTerritories: 0 },
+    { id: 2, name: 'Eco', symbol: '🌱', memberCount: 0, totalTerritories: 0 },
+    { id: 3, name: 'Dev', symbol: '⚡', memberCount: 0, totalTerritories: 0 },
+    { id: 4, name: 'Xyz', symbol: '🚀', memberCount: 0, totalTerritories: 0 }
   ]
   
   // Game territories - reset each round
@@ -264,6 +295,106 @@ export default function Home() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Initialize WebSocket client after mount
+  useEffect(() => {
+    if (!mounted) return
+    
+    // Initialize WebSocket client
+    const client = getMultiplayerClient()
+    setMultiplayerClient(client)
+    
+    // Set up event handlers
+    client.onConnectionStatusChanged = (connected: boolean) => {
+      setWsConnected(connected)
+      console.log('🔌 WebSocket connection status:', connected)
+    }
+    
+    client.onRoomJoined = (data: RoomData) => {
+      console.log('🎉 Room joined:', data)
+      setCurrentRoom(data.roomId)
+      setRealRoomPlayers(data.players.map(p => p.username))
+      setIsSearchingReal(false)
+      
+      // Show success toast
+      const toast = document.createElement('div')
+      toast.innerHTML = `🎯 Joined real room: ${data.roomId} (${data.playerCount}/${data.maxPlayers})`
+      toast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        background: linear-gradient(45deg, #4CAF50, #45a049); 
+        color: white; padding: 1rem; border-radius: 8px; 
+        z-index: 1000; font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `
+      document.body.appendChild(toast)
+      setTimeout(() => document.body.removeChild(toast), 3000)
+    }
+    
+    client.onRoomUpdated = (data: RoomData) => {
+      console.log('🔄 Room updated:', data)
+      setRealRoomPlayers(data.players.map(p => p.username))
+      
+      // Update search toast if searching
+      const existingToast = document.querySelector('.search-toast')
+      if (existingToast) {
+        existingToast.innerHTML = `🔍 Found ${data.playerCount}/4 real players...`
+      }
+    }
+    
+    client.onRoomReady = (data: { roomId: string; message: string }) => {
+      console.log('🎉 Room ready:', data)
+      setIsSearchingReal(false)
+      
+      // Remove search toast
+      const searchToast = document.querySelector('.search-toast')
+      if (searchToast) {
+        document.body.removeChild(searchToast)
+      }
+      
+      // Show room ready toast
+      const readyToast = document.createElement('div')
+      readyToast.innerHTML = `🎉 Room Ready! 4/4 real players found`
+      readyToast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        background: linear-gradient(45deg, #4CAF50, #45a049); 
+        color: white; padding: 1rem; border-radius: 8px; 
+        z-index: 1000; font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `
+      document.body.appendChild(readyToast)
+      setTimeout(() => document.body.removeChild(readyToast), 5000)
+    }
+    
+    client.onJoinFailed = (data: { message: string }) => {
+      console.error('❌ Join failed:', data)
+      setIsSearchingReal(false)
+      
+      const failToast = document.createElement('div')
+      failToast.innerHTML = `❌ Failed to join: ${data.message}`
+      failToast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        background: linear-gradient(45deg, #FF5722, #D32F2F); 
+        color: white; padding: 1rem; border-radius: 8px; 
+        z-index: 1000; font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `
+      document.body.appendChild(failToast)
+      setTimeout(() => document.body.removeChild(failToast), 3000)
+    }
+    
+    // Connect to WebSocket server
+    client.connect().catch(console.error)
+    
+    // Cleanup on unmount
+    return () => {
+      client.disconnect()
+      // Also cleanup any remaining popups
+      const existingPopup = document.getElementById('winner-popup-backdrop')
+      if (existingPopup) {
+        document.body.removeChild(existingPopup)
+      }
+    }
+  }, [mounted])
 
   // Real-time updates
   const { updates } = useTerritoryUpdates({
@@ -377,9 +508,14 @@ export default function Home() {
       setShowUsernameInput(true)
       return
     }
-
+    
     if (!currentRoom) {
-      alert('❌ You must join a room before starting the game!\n\nClick "Find Random Match" to join a multiplayer room.')
+      alert('❌ Please join a room first!')
+      return
+    }
+    
+    if (gameMode === 'real' && realRoomPlayers.length < 4) {
+      alert(`❌ Real mode requires 4 players!\n\nCurrent players: ${realRoomPlayers.length}/4\nWaiting for more players to join...`)
       return
     }
 
@@ -486,19 +622,86 @@ export default function Home() {
       setShowUsernameInput(true)
       return
     }
-
-    // Simulate finding a random match
+    setShowMatchmakingModal(true)
+  }
+  
+  const handleDemoMatch = () => {
+    setGameMode('demo')
     const randomRoomId = Math.floor(Math.random() * 1000) + 1
-    setCurrentRoom(`ROOM-${randomRoomId}`)
-    setShowRoomInput(false)
+    setCurrentRoom(`DEMO-${randomRoomId}`)
+    setShowMatchmakingModal(false)
     
     // Simulate 1-3 other players
     const playerCount = Math.floor(Math.random() * 3) + 2 // 2-4 players total
-    alert(`🎮 Match Found!\n\nRoom: ROOM-${randomRoomId}\nPlayers: ${playerCount}/4\nYour Username: ${username}\n\nGet ready to battle!`)
+    alert(`🎮 Demo Match Found!\n\nRoom: DEMO-${randomRoomId}\nPlayers: ${playerCount}/4\nYour Username: ${username}\n\nGet ready to battle!`)
   }
+  
+  const handleRealMatch = () => {
+    if (!multiplayerClient || !wsConnected) {
+      alert('❌ WebSocket server not connected! Please try again in a moment.')
+      return
+    }
+    
+    setGameMode('real')
+    setIsSearchingReal(true)
+    setShowMatchmakingModal(false)
+    
+    // Show searching toast
+    const searchToast = document.createElement('div')
+    searchToast.className = 'search-toast'
+    searchToast.innerHTML = `🔍 Searching for real players...`
+    searchToast.style.cssText = `
+      position: fixed; top: 20px; right: 20px; 
+      background: linear-gradient(45deg, #FF9800, #F57C00); 
+      color: white; padding: 1rem; border-radius: 8px; 
+      z-index: 1000; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `
+    document.body.appendChild(searchToast)
+    
+    // Join real match via WebSocket
+    const success = multiplayerClient.joinRealMatch(username, address!)
+    if (!success) {
+      setIsSearchingReal(false)
+      document.body.removeChild(searchToast)
+      alert('❌ Failed to send join request. Please try again.')
+    }
+    
+    // Timeout after 60 seconds
+    setTimeout(() => {
+      if (isSearchingReal) {
+        setIsSearchingReal(false)
+        const existingToast = document.querySelector('.search-toast')
+        if (existingToast) {
+          document.body.removeChild(existingToast)
+        }
+        
+        const failToast = document.createElement('div')
+        failToast.innerHTML = `❌ Couldn't find 4 real players. Try again!`
+        failToast.style.cssText = `
+          position: fixed; top: 20px; right: 20px; 
+          background: linear-gradient(45deg, #FF5722, #D32F2F); 
+          color: white; padding: 1rem; border-radius: 8px; 
+          z-index: 1000; font-weight: 600;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `
+        document.body.appendChild(failToast)
+        setTimeout(() => document.body.removeChild(failToast), 3000)
+      }
+    }, 60000)
+  }
+  
 
   const handleLeaveRoom = () => {
+    // Leave real room via WebSocket if in real mode
+    if (gameMode === 'real' && multiplayerClient && wsConnected) {
+      multiplayerClient.leaveRoom()
+    }
+    
     setCurrentRoom('')
+    setRealRoomPlayers([])
+    setIsSearchingReal(false)
+    setGameMode('demo')
     alert('👋 Left multiplayer room. You\'re now in solo mode.')
   }
 
@@ -549,6 +752,22 @@ export default function Home() {
     const winner = availableFactions.find(f => f.id === winnerFaction)
     console.log('🏆 Winner determined:', { winnerFaction, maxScore, winner: winner?.name })
     
+    // Update leaderboard for all players who participated
+    if (username && address && selectedFaction > 0) {
+      const playerFaction = availableFactions.find(f => f.id === selectedFaction)
+      if (playerFaction) {
+        const isPlayerWinner = selectedFaction === winnerFaction
+        updatePlayerStats(
+          username,
+          address,
+          playerFaction.name,
+          playerFaction.symbol,
+          isPlayerWinner
+        )
+        console.log('📊 Leaderboard updated:', { username, won: isPlayerWinner })
+      }
+    }
+    
     // Check if current player is in winning team
     const isPlayerWinner = selectedFaction === winnerFaction
     console.log('🎯 Player winner check:', { selectedFaction, winnerFaction, isPlayerWinner })
@@ -581,7 +800,28 @@ export default function Home() {
     // Show winner NFT claim popup (only for winners)
     console.log('🎉 SHOWING WINNER NFT POPUP!')
     
+    // Clean up any existing popups first
+    const existingPopup = document.getElementById('winner-popup-backdrop')
+    if (existingPopup) {
+      document.body.removeChild(existingPopup)
+    }
+    
+    // Create popup container with backdrop
+    const popupBackdrop = document.createElement('div')
+    popupBackdrop.id = 'winner-popup-backdrop'
+    popupBackdrop.style.cssText = `
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0, 0, 0, 0.8); 
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `
+    
     const winnerDiv = document.createElement('div')
+    winnerDiv.id = 'winner-popup-content'
     winnerDiv.innerHTML = `
       <div style="text-align: center;">
         🏆 CONGRATULATIONS! 🏆<br/>
@@ -597,40 +837,68 @@ export default function Home() {
           font-size: 1.1em; font-weight: bold;
         ">🏆 Claim Winner NFT</button>
         <br/>
-        <button onclick="this.parentElement.remove()" style="
+        <button id="closePopup" style="
           background: #666; border: none; border-radius: 4px; 
           color: white; padding: 0.5rem 1rem; margin-top: 1rem; cursor: pointer;
         ">Close</button>
       </div>
     `
     winnerDiv.style.cssText = `
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
       background: linear-gradient(45deg, #FFD700, #FFA500); 
       color: black; padding: 2rem; border-radius: 12px; 
-      z-index: 1000; font-weight: 600; text-align: center;
+      font-weight: 600; text-align: center;
       box-shadow: 0 8px 30px rgba(0,0,0,0.5);
       font-size: 1.2rem; line-height: 1.5;
+      max-width: 400px;
+      margin: 1rem;
     `
-    console.log('📢 ADDING POPUP TO DOM!')
-    document.body.appendChild(winnerDiv)
     
-    // Add click handler for NFT claim
+    popupBackdrop.appendChild(winnerDiv)
+    console.log('📢 ADDING POPUP TO DOM!')
+    document.body.appendChild(popupBackdrop)
+    
+    // Cleanup function
+    const cleanupPopup = () => {
+      console.log('🧹 Cleaning up winner popup')
+      const existingBackdrop = document.getElementById('winner-popup-backdrop')
+      if (existingBackdrop) {
+        document.body.removeChild(existingBackdrop)
+      }
+    }
+    
+    // Add click handlers
     setTimeout(() => {
       const claimButton = document.getElementById('claimNFT')
+      const closeButton = document.getElementById('closePopup')
+      
       if (claimButton) {
         console.log('🔗 Adding NFT claim handler')
-        claimButton.addEventListener('click', handleClaimNFT)
+        claimButton.addEventListener('click', async () => {
+          await handleClaimNFT()
+          cleanupPopup()
+        })
       } else {
         console.error('❌ Claim button not found!')
       }
+      
+      if (closeButton) {
+        console.log('🔗 Adding close handler')
+        closeButton.addEventListener('click', cleanupPopup)
+      } else {
+        console.error('❌ Close button not found!')
+      }
+      
+      // Also allow clicking backdrop to close
+      popupBackdrop.addEventListener('click', (e) => {
+        if (e.target === popupBackdrop) {
+          cleanupPopup()
+        }
+      })
     }, 100)
     
     // Auto-remove after 60 seconds
     setTimeout(() => {
-      if (document.body.contains(winnerDiv)) {
-        console.log('⏰ Auto-removing winner popup')
-        document.body.removeChild(winnerDiv)
-      }
+      cleanupPopup()
     }, 60000)
   }
 
@@ -660,13 +928,20 @@ export default function Home() {
         <Header>
           <HeaderLeft>
             <Title>🏰 Monad Dominion</Title>
-            <LeaderboardButton
-              onClick={() => router.push('/leaderboard')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <div style={{
+              background: 'linear-gradient(45deg, #FFD700, #FFA500)',
+              border: 'none',
+              borderRadius: '8px',
+              color: '#000',
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
               🏆 Leaderboard
-            </LeaderboardButton>
+            </div>
           </HeaderLeft>
           <div style={{ padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
             Loading...
@@ -687,17 +962,31 @@ export default function Home() {
             </div>
           </MapContainer>
           
-          <Sidebar>
+          <LeftSidebar>
             <div style={{ 
               background: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: '12px', 
-              padding: '2rem', 
-              textAlign: 'center' 
+              borderRadius: '8px', 
+              padding: '1rem', 
+              textAlign: 'center',
+              fontSize: '0.9rem'
             }}>
-              <h3>🔄 Loading</h3>
-              <p>Initializing game components...</p>
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>🔄 Loading</h3>
+              <p style={{ margin: 0, opacity: 0.8 }}>Initializing...</p>
             </div>
-          </Sidebar>
+          </LeftSidebar>
+          
+          <RightSidebar>
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)', 
+              borderRadius: '8px', 
+              padding: '1rem', 
+              textAlign: 'center',
+              fontSize: '0.9rem'
+            }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>⚡ Ready</h3>
+              <p style={{ margin: 0, opacity: 0.8 }}>Waiting for wallet...</p>
+            </div>
+          </RightSidebar>
         </GameArea>
       </Container>
     )
@@ -708,13 +997,14 @@ export default function Home() {
       <Header>
         <HeaderLeft>
           <Title>🏰 Monad Dominion</Title>
-          <LeaderboardButton
-            onClick={() => router.push('/leaderboard')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🏆 Leaderboard
-          </LeaderboardButton>
+          <Link href="/leaderboard">
+            <LeaderboardButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              🏆 Leaderboard
+            </LeaderboardButton>
+          </Link>
           
           {isConnected && (
             <ClearNonceButton
@@ -726,122 +1016,197 @@ export default function Home() {
               {isClearingNonce ? '🔄 Clearing...' : '🔧 Fix Nonce'}
             </ClearNonceButton>
           )}
+          
+          {/* Username System in Header */}
+          {isConnected && (
+            <>
+              {showUsernameInput ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Username..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    maxLength={20}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSetUsername()}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '6px',
+                      color: 'white',
+                      padding: '0.4rem',
+                      fontSize: '0.8rem',
+                      width: '120px'
+                    }}
+                  />
+                  <button
+                    onClick={handleSetUsername}
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', /* Green gradient */
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '700', /* Inter Bold */
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 16px rgba(76, 175, 80, 0.4)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Set
+                  </button>
+                </div>
+              ) : username ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{
+                    fontFamily: 'Inter, sans-serif',
+                    background: 'rgba(251, 250, 249, 0.1)', /* Monad Kirli Beyaz */
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(251, 250, 249, 0.2)',
+                    color: '#FBFAF9', /* Monad Kirli Beyaz */
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500', /* Inter Medium */
+                    boxShadow: '0 2px 12px rgba(32, 0, 82, 0.15)'
+                  }}>
+                    👤 {username}
+                  </div>
+                  <button
+                    onClick={() => setShowUsernameInput(true)}
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      background: 'rgba(14, 16, 15, 0.4)', /* Monad Siyahı */
+                      border: '1px solid rgba(251, 250, 249, 0.2)',
+                      borderRadius: '8px',
+                      color: '#FBFAF9', /* Monad Kirli Beyaz */
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500', /* Inter Medium */
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Change
+                  </button>
+                </div>
+              ) : null}
+              
+              {/* Matchmaking in Header */}
+              {!currentRoom ? (
+                <button
+                  onClick={handleFindMatch}
+                  style={{
+                    fontFamily: 'Inter, sans-serif',
+                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', /* Blue gradient */
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '8px',
+                    color: '#FFFFFF',
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '700', /* Inter Bold */
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(33, 150, 243, 0.4)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🎯 Find Match
+                </button>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{
+                    fontFamily: 'Inter, sans-serif',
+                    background: 'rgba(131, 110, 249, 0.15)', /* Monad Moru - subtle */
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(131, 110, 249, 0.3)',
+                    color: '#FBFAF9', /* Monad Kirli Beyaz */
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500', /* Inter Medium */
+                    boxShadow: '0 2px 12px rgba(131, 110, 249, 0.2)'
+                  }}>
+                    {gameMode === 'real' ? '👥' : '🏆'} {currentRoom}
+                    {gameMode === 'real' && realRoomPlayers.length > 0 && (
+                      <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '2px' }}>
+                        {realRoomPlayers.length}/4 players
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleLeaveRoom}
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      background: 'linear-gradient(135deg, #FF5722 0%, #D32F2F 100%)', /* Red gradient */
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '700', /* Inter Bold */
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 16px rgba(255, 87, 34, 0.4)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🚪 Leave
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </HeaderLeft>
         <ConnectButton />
       </Header>
       
       <GameArea>
-        <MapContainer>
-          <HexGrid 
-            territories={territories}
-            onTerritoryClick={handleTerritoryClick}
-            playerFaction={selectedFaction} // Use selected faction for demo
-          />
-        </MapContainer>
-        
-        <Sidebar>
+        <LeftSidebar>
           {!isConnected ? (
             <div style={{ 
               background: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: '12px', 
-              padding: '2rem', 
-              textAlign: 'center' 
+              borderRadius: '8px', 
+              padding: '1rem', 
+              textAlign: 'center',
+              fontSize: '0.9rem'
             }}>
-              <h3>🔗 Connect Wallet</h3>
-              <p>Connect your wallet to join a faction and start playing!</p>
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#FFD700' }}>🔗 Connect Wallet</h3>
+              <p style={{ margin: 0, opacity: 0.8 }}>Connect to join the battle!</p>
             </div>
           ) : (
             <>
+              {/* Only Daily Streak System */}
               <StreakSystem 
                 playerAddress={address}
                 onStreakUpdate={handleStreakUpdate}
               />
+            </>
+          )}
+        </LeftSidebar>
 
-              {/* Username System */}
-              {showUsernameInput ? (
-                <UsernameContainer>
-                  <UsernameTitle>👤 Set Your Username</UsernameTitle>
-                  <UsernameInputGroup>
-                    <UsernameInput
-                      type="text"
-                      placeholder="Enter your username..."
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      maxLength={20}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSetUsername()}
-                    />
-                    <RoomButton
-                      onClick={handleSetUsername}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Set Username
-                    </RoomButton>
-                  </UsernameInputGroup>
-                  <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>
-                    Choose a unique username (3-20 characters)
-                  </div>
-                </UsernameContainer>
-              ) : username ? (
-                <UsernameContainer>
-                  <UsernameDisplay>
-                    👤 {username}
-                  </UsernameDisplay>
-                  <RoomButton
-                    onClick={() => setShowUsernameInput(true)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{ background: 'linear-gradient(45deg, #666, #444)', fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-                  >
-                    Change Username
-                  </RoomButton>
-                </UsernameContainer>
-              ) : null}
-
-              {/* Matchmaking System */}
-              <RoomContainer>
-                <RoomTitle>🌐 Multiplayer Matchmaking</RoomTitle>
-                {!currentRoom ? (
-                  <RoomButtons>
-                    <RoomButton
-                      onClick={handleFindMatch}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      🎯 Find Random Match
-                    </RoomButton>
-                  </RoomButtons>
-                ) : (
-                  <div>
-                    <CurrentRoomDisplay>
-                      🏆 {currentRoom} - Multiplayer Battle Active!
-                    </CurrentRoomDisplay>
-                    <div style={{ marginTop: '1rem' }}>
-                      <RoomButton
-                        onClick={handleLeaveRoom}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        style={{ background: 'linear-gradient(45deg, #e74c3c, #c0392b)' }}
-                      >
-                        🚪 Leave Room
-                      </RoomButton>
-                    </div>
-                  </div>
-                )}
-                
-                <div style={{ 
-                  fontSize: '0.9rem', 
-                  opacity: 0.7, 
-                  marginTop: '1rem',
-                  textAlign: 'center'
-                }}>
-                  {currentRoom 
-                    ? 'You\'re in a multiplayer room! Compete with other players in real-time.'
-                    : 'Find a random match to play with other players online!'
-                  }
-                </div>
-              </RoomContainer>
-              
+        <MapContainer>
+          <div style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            color: '#FBFAF9',
+            textShadow: '0 0 12px rgba(131, 110, 249, 0.4)',
+            marginBottom: '0.75rem',
+            letterSpacing: '-0.01em'
+          }}>
+            🗺️ Battle Map • {Object.keys(territories).length} Territories Claimed
+          </div>
+          <HexGrid 
+            territories={territories}
+            onTerritoryClick={handleTerritoryClick}
+            playerFaction={selectedFaction}
+          />
+        </MapContainer>
+        
+        <RightSidebar>
+          {isConnected && (
+            <>
               <GameTimer 
                 gameActive={gameActive}
                 gameStartTime={gameStartTime}
@@ -868,13 +1233,12 @@ export default function Home() {
                   
                   <div style={{
                     background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    marginBottom: '1rem',
+                    borderRadius: '6px',
+                    padding: '0.5rem',
                     textAlign: 'center',
-                    fontSize: '0.9rem'
+                    fontSize: '0.8rem'
                   }}>
-                    🎨 <strong>{territoriesPaintedThisGame}/{streakData.paintingCapacity}</strong> territories painted this game
+                    🎨 <strong>{territoriesPaintedThisGame}/{streakData.paintingCapacity}</strong> painted
                   </div>
                   
                   <LiveFeed updates={updates} />
@@ -882,8 +1246,171 @@ export default function Home() {
               )}
             </>
           )}
-        </Sidebar>
+        </RightSidebar>
       </GameArea>
+      
+      {/* Matchmaking Modal */}
+      {showMatchmakingModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000
+        }}>
+          <div style={{
+            fontFamily: 'Inter, sans-serif',
+            background: 'rgba(251, 250, 249, 0.1)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(251, 250, 249, 0.2)',
+            borderRadius: '16px',
+            padding: '2rem',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 8px 32px rgba(32, 0, 82, 0.4)',
+            textAlign: 'center'
+          }}>
+            <h2 style={{
+              color: '#FBFAF9',
+              marginBottom: '1rem',
+              fontSize: '1.5rem',
+              fontWeight: '700'
+            }}>
+              🎮 Choose Game Mode
+            </h2>
+            
+            <p style={{
+              color: 'rgba(251, 250, 249, 0.8)',
+              marginBottom: '2rem',
+              fontSize: '0.9rem',
+              lineHeight: '1.5'
+            }}>
+              Select how you want to play Monad Dominion
+            </p>
+            
+            {/* WebSocket connection status */}
+            <div style={{
+              background: wsConnected ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 87, 34, 0.1)',
+              border: wsConnected ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(255, 87, 34, 0.3)',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              fontSize: '0.8rem',
+              color: 'rgba(251, 250, 249, 0.8)'
+            }}>
+              {wsConnected ? '🟢' : '🔴'} <strong>WebSocket:</strong> {wsConnected ? 'Connected to real multiplayer server' : 'Connecting to server...'}
+            </div>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '1rem',
+              marginBottom: '2rem'
+            }}>
+              <button
+                onClick={handleDemoMatch}
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  padding: '1.5rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(76, 175, 80, 0.4)',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(76, 175, 80, 0.6)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(76, 175, 80, 0.4)'
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🤖</div>
+                <div style={{ fontWeight: '700', marginBottom: '0.25rem' }}>DEMO MODE</div>
+                <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                  Play with AI simulation<br/>
+                  Instant matchmaking
+                </div>
+              </button>
+              
+              <button
+                onClick={handleRealMatch}
+                disabled={!wsConnected}
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  background: wsConnected ? 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' : 'linear-gradient(135deg, #9E9E9E 0%, #757575 100%)',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  padding: '1.5rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  cursor: wsConnected ? 'pointer' : 'not-allowed',
+                  boxShadow: wsConnected ? '0 4px 16px rgba(255, 152, 0, 0.4)' : '0 4px 16px rgba(158, 158, 158, 0.4)',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center',
+                  opacity: wsConnected ? 1 : 0.6
+                }}
+                onMouseEnter={(e) => {
+                  if (wsConnected) {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 152, 0, 0.6)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (wsConnected) {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 152, 0, 0.4)'
+                  }
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👥</div>
+                <div style={{ fontWeight: '700', marginBottom: '0.25rem' }}>REAL MODE</div>
+                <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                  Play with real players<br/>
+                  4-player matchmaking
+                </div>
+              </button>
+            </div>
+            
+            <button
+              onClick={() => setShowMatchmakingModal(false)}
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '8px',
+                color: 'rgba(251, 250, 249, 0.8)',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </Container>
   )
 }

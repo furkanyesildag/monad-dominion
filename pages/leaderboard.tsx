@@ -197,23 +197,101 @@ const NFTBadge = styled.div`
   margin-left: 0.5rem;
 `
 
-const mockPlayers = [
-  { address: '0xabc...123', faction: 'Crimson Warriors', symbol: '🔥', winCount: 5, lastWin: '2 hours ago' },
-  { address: '0xdef...456', faction: 'Azure Guardians', symbol: '🌊', winCount: 3, lastWin: '1 day ago' },
-  { address: '0xghi...789', faction: 'Emerald Legion', symbol: '🌿', winCount: 2, lastWin: '3 days ago' },
-  { address: '0xjkl...012', faction: 'Crimson Warriors', symbol: '🔥', winCount: 2, lastWin: '1 week ago' },
-  { address: '0xmno...345', faction: 'Azure Guardians', symbol: '🌊', winCount: 1, lastWin: '2 weeks ago' },
-]
+// Real leaderboard data structure
+interface PlayerData {
+  username: string
+  address: string
+  faction: string
+  symbol: string
+  winCount: number
+  lastWin: string
+  totalGames: number
+  winRate: number
+}
+
+// Get leaderboard data from localStorage
+const getLeaderboardData = (): PlayerData[] => {
+  if (typeof window === 'undefined') return []
+  
+  const stored = localStorage.getItem('monad-leaderboard')
+  if (!stored) return []
+  
+  try {
+    return JSON.parse(stored)
+  } catch {
+    return []
+  }
+}
+
+// Save leaderboard data to localStorage
+const saveLeaderboardData = (data: PlayerData[]) => {
+  if (typeof window === 'undefined') return
+  localStorage.setItem('monad-leaderboard', JSON.stringify(data))
+}
+
+// Add or update player data
+export const updatePlayerStats = (
+  username: string, 
+  address: string, 
+  faction: string, 
+  symbol: string, 
+  won: boolean
+) => {
+  const data = getLeaderboardData()
+  const existingIndex = data.findIndex(p => p.username === username || p.address === address)
+  
+  if (existingIndex >= 0) {
+    // Update existing player
+    data[existingIndex].totalGames += 1
+    if (won) {
+      data[existingIndex].winCount += 1
+      data[existingIndex].lastWin = `${Math.floor(Date.now() / 1000)} seconds ago`
+    }
+    data[existingIndex].winRate = (data[existingIndex].winCount / data[existingIndex].totalGames) * 100
+    data[existingIndex].faction = faction // Update current faction
+    data[existingIndex].symbol = symbol
+  } else {
+    // Add new player
+    data.push({
+      username,
+      address,
+      faction,
+      symbol,
+      winCount: won ? 1 : 0,
+      lastWin: won ? `${Math.floor(Date.now() / 1000)} seconds ago` : 'Never',
+      totalGames: 1,
+      winRate: won ? 100 : 0
+    })
+  }
+  
+  saveLeaderboardData(data)
+  return data
+}
 
 export default function Leaderboard() {
   const router = useRouter()
   const { isConnected } = useAccount()
-  const [playerStats, setPlayerStats] = useState(mockPlayers)
+  const [playerStats, setPlayerStats] = useState<PlayerData[]>([])
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
     setMounted(true)
+    // Load real leaderboard data
+    const data = getLeaderboardData()
+    setPlayerStats(data)
   }, [])
+  
+  // Refresh data every 10 seconds
+  useEffect(() => {
+    if (!mounted) return
+    
+    const interval = setInterval(() => {
+      const data = getLeaderboardData()
+      setPlayerStats(data)
+    }, 10000)
+    
+    return () => clearInterval(interval)
+  }, [mounted])
 
   // Show loading until mounted
   if (!mounted) {
@@ -268,17 +346,51 @@ export default function Leaderboard() {
         </div>
         
         <PlayerList>
-          {leaderboardData.map((player) => (
+          {leaderboardData.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 2rem',
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏆</div>
+              <h3 style={{ marginBottom: '1rem', color: '#FFD700' }}>No Players Yet!</h3>
+              <p style={{ opacity: 0.7, marginBottom: '1.5rem' }}>
+                Be the first to play and win NFTs! Connect your wallet, set a username, and start battling.
+              </p>
+              <button
+                onClick={() => router.push('/')}
+                style={{
+                  background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'black',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                🎮 Start Playing
+              </button>
+            </div>
+          ) : (
+            leaderboardData.map((player) => (
             <PlayerItem key={player.address} rank={player.rank}>
               <RankBadge rank={player.rank}>{player.rank}</RankBadge>
               <PlayerDetails>
                 <PlayerAddress>
                   <FactionSymbol>{player.symbol}</FactionSymbol> 
-                  {player.address}
+                  {player.username}
                   {player.winCount > 0 && <NFTBadge>🏆 {player.winCount} NFTs</NFTBadge>}
                 </PlayerAddress>
                 <PlayerInfo>
-                  Faction: {player.faction} • Last Win: {player.lastWin}
+                  {player.faction} • {player.totalGames} games • {player.winRate.toFixed(1)}% win rate
+                  <br />
+                  <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+                    {player.address} • Last Win: {player.lastWin}
+                  </span>
                 </PlayerInfo>
               </PlayerDetails>
               <StatCard>
@@ -286,7 +398,8 @@ export default function Leaderboard() {
                 <StatLabel>Winner NFTs</StatLabel>
               </StatCard>
             </PlayerItem>
-          ))}
+            ))
+          )}
         </PlayerList>
         
         <div style={{ 
@@ -300,7 +413,7 @@ export default function Leaderboard() {
         }}>
           🎮 Win games to earn exclusive Winner NFTs! Each victory in a 2-minute battle round rewards the winning faction members with unique NFTs.
           <br />
-          {mounted ? `Last Updated: ${new Date().toLocaleTimeString()}` : 'Live Leaderboard'}
+          Live Leaderboard
         </div>
       </MainContent>
     </Container>

@@ -13,83 +13,101 @@ interface GameTimerProps {
 }
 
 const Container = styled.div`
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Inter', sans-serif;
+  background: rgba(251, 250, 249, 0.06); /* Monad Kirli Beyaz - subtle */
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(251, 250, 249, 0.12);
+  box-shadow: 
+    0 4px 24px rgba(32, 0, 82, 0.15), /* Monad Mavisi shadow */
+    inset 0 1px 0 rgba(251, 250, 249, 0.08);
+  border-radius: 8px;
+  padding: 0.75rem;
   text-align: center;
 `
 
 const Title = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 3s ease infinite;
-  
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700; /* Inter Bold */
+  margin-bottom: 0.5rem;
+  color: #FBFAF9; /* Monad Kirli Beyaz */
+  text-shadow: 0 0 16px rgba(131, 110, 249, 0.4); /* Monad Moru glow */
+  letter-spacing: -0.01em; /* Inter optimal spacing */
 `
 
 const TimerDisplay = styled.div<{ timeLeft: number }>`
-  font-size: 3rem;
-  font-weight: bold;
-  margin: 1.5rem 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800; /* Inter Extra Bold */
+  margin: 0.5rem 0;
+  letter-spacing: -0.02em; /* Inter optimal spacing */
   color: ${props => {
-    if (props.timeLeft <= 30) return '#FF4444'
-    if (props.timeLeft <= 60) return '#FFA500'
-    return '#4ECDC4'
+    if (props.timeLeft <= 30) return '#A0055D' /* Monad Böğürtleni - urgent */
+    if (props.timeLeft <= 60) return '#836EF9' /* Monad Moru - warning */
+    return '#FBFAF9' /* Monad Kirli Beyaz - normal */
   }};
-  text-shadow: 0 0 20px currentColor;
+  text-shadow: ${props => {
+    if (props.timeLeft <= 30) return '0 0 15px rgba(160, 5, 93, 0.6)'
+    if (props.timeLeft <= 60) return '0 0 15px rgba(131, 110, 249, 0.6)'
+    return '0 0 12px rgba(251, 250, 249, 0.3)'
+  }};
 `
 
 const GameStatus = styled.div<{ active: boolean }>`
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 1rem 0;
-  padding: 0.75rem 1.5rem;
-  border-radius: 25px;
-  background: ${props => props.active 
-    ? 'linear-gradient(45deg, #44FF44, #22CC22)' 
-    : 'linear-gradient(45deg, #666666, #444444)'
-  };
-  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600; /* Inter SemiBold */
+  margin: 0.375rem 0;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  background: ${props => props.active ? '#836EF9' : 'rgba(14, 16, 15, 0.4)'}; /* Monad Moru / Monad Siyahı */
+  color: #FBFAF9; /* Monad Kirli Beyaz */
   display: inline-block;
+  border: 1px solid ${props => props.active ? 'rgba(251, 250, 249, 0.2)' : 'rgba(251, 250, 249, 0.1)'};
+  box-shadow: ${props => props.active ? '0 2px 8px rgba(131, 110, 249, 0.2)' : 'none'};
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 `
 
 const StartButton = styled(motion.button)`
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); /* Orange gradient */
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #FFFFFF;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.8rem;
+  font-weight: 700; /* Inter Bold */
   cursor: pointer;
-  margin-top: 1rem;
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4);
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   
   &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #FF5722 0%, #D32F2F 100%); /* Red gradient on hover */
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  &:disabled {
+    background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%); /* Gray gradient */
+    color: rgba(255, 255, 255, 0.6);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+    transform: none;
   }
 `
 
 const RoundInfo = styled.div`
-  font-size: 1rem;
-  opacity: 0.8;
-  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 400; /* Inter Regular */
+  color: rgba(251, 250, 249, 0.7); /* Monad Kirli Beyaz - muted */
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.01em;
 `
 
 const GAME_DURATION = 120 // 2 minutes

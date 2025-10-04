@@ -8,68 +8,124 @@ interface StreakSystemProps {
 }
 
 export interface StreakData {
-  dailyStreak: number
+  minuteStreak: number
   gamesPlayedToday: number
   maxGamesPerDay: number
   paintingCapacity: number
-  lastPlayDate: string
+  lastStreakTime: string
 }
 
 const Container = styled.div`
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 1.5rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+  background: rgba(251, 250, 249, 0.06); /* Monad Kirli Beyaz - subtle */
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(251, 250, 249, 0.12);
+  box-shadow: 
+    0 4px 24px rgba(32, 0, 82, 0.15), /* Monad Mavisi shadow */
+    inset 0 1px 0 rgba(251, 250, 249, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
 `
 
 const Title = styled.h3`
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 700; /* Inter Bold */
+  margin-bottom: 0.75rem;
   text-align: center;
-  background: linear-gradient(45deg, #FFD700, #FFA500);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 3s ease infinite;
+  color: #FBFAF9; /* Monad Kirli Beyaz */
+  text-shadow: 0 0 16px rgba(131, 110, 249, 0.4); /* Monad Moru glow */
+  letter-spacing: -0.01em; /* Inter optimal spacing */
+  line-height: 1.2;
+`
+
+const ClaimButton = styled(motion.button)`
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); /* Purple gradient */
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #FFFFFF;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700; /* Inter Bold */
+  cursor: pointer;
+  margin-top: 0.75rem;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(156, 39, 176, 0.4);
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%); /* Pink gradient on hover */
+    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5);
+    transform: translateY(-2px);
   }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%); /* Gray gradient */
+    color: rgba(255, 255, 255, 0.6);
+    box-shadow: none;
+    transform: none;
+  }
+`
+
+const TimerDisplay = styled.div`
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500; /* Inter Medium */
+  text-align: center;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(131, 110, 249, 0.1); /* Monad Moru - subtle */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(131, 110, 249, 0.2);
+  border-radius: 8px;
+  color: #FBFAF9; /* Monad Kirli Beyaz */
+  box-shadow: 0 2px 12px rgba(131, 110, 249, 0.15);
+  letter-spacing: -0.01em;
 `
 
 const StreakDisplay = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 `
 
 const StatCard = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 1rem;
+  font-family: 'Inter', sans-serif;
+  background: rgba(14, 16, 15, 0.2); /* Monad Siyahı - subtle */
+  backdrop-filter: blur(12px);
+  border-radius: 8px;
+  padding: 0.75rem;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(251, 250, 249, 0.1);
+  box-shadow: 0 2px 12px rgba(32, 0, 82, 0.1);
 `
 
 const StatValue = styled.div<{ highlight?: boolean }>`
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: ${props => props.highlight ? '#FFD700' : '#4ECDC4'};
-  margin-bottom: 0.3rem;
-  text-shadow: ${props => props.highlight ? '0 0 10px rgba(255, 215, 0, 0.5)' : 'none'};
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700; /* Inter Bold */
+  color: ${props => props.highlight ? '#FBFAF9' : '#FBFAF9'}; /* Monad Kirli Beyaz */
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em; /* Inter optimal spacing */
+  text-shadow: ${props => props.highlight ? 
+    '0 0 12px rgba(131, 110, 249, 0.6)' : /* Monad Moru glow */
+    'none'
+  };
 `
 
 const StatLabel = styled.div`
-  font-size: 0.8rem;
-  opacity: 0.7;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500; /* Inter Medium */
+  color: rgba(251, 250, 249, 0.7); /* Monad Kirli Beyaz - muted */
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em; /* Inter optimal spacing */
 `
 
 const ProgressBar = styled.div`
@@ -98,10 +154,12 @@ const CapacityInfo = styled.div`
 `
 
 const StreakBonus = styled.div<{ show: boolean }>`
-  background: linear-gradient(45deg, #FFD700, #FFA500);
-  color: black;
+  background: rgba(131, 110, 249, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(131, 110, 249, 0.5);
+  color: #836EF9;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 600;
   text-align: center;
@@ -109,67 +167,149 @@ const StreakBonus = styled.div<{ show: boolean }>`
   opacity: ${props => props.show ? 1 : 0};
   transform: ${props => props.show ? 'scale(1)' : 'scale(0.8)'};
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(131, 110, 249, 0.2);
 `
 
 const STORAGE_KEY = 'monad-dominion-streak'
 
 export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSystemProps) {
   const [streakData, setStreakData] = useState<StreakData>({
-    dailyStreak: 0,
+    minuteStreak: 0,
     gamesPlayedToday: 0,
     maxGamesPerDay: 6,
     paintingCapacity: 1,
-    lastPlayDate: ''
+    lastStreakTime: ''
   })
   const [mounted, setMounted] = useState(false)
+  const [canClaimStreak, setCanClaimStreak] = useState(false)
+  const [timeUntilNextStreak, setTimeUntilNextStreak] = useState(0)
 
   // Mount component first
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Load streak data from localStorage only after mounting
+  // Load streak data and check minute timer
   useEffect(() => {
     if (!mounted || !playerAddress) return
 
     const stored = localStorage.getItem(`${STORAGE_KEY}-${playerAddress}`)
-    if (stored) {
-      const data = JSON.parse(stored)
-      const today = new Date().toDateString()
-      
-      // Check if it's a new day
-      if (data.lastPlayDate !== today) {
-        // New day - check if streak continues
-        const lastDate = new Date(data.lastPlayDate)
-        const todayDate = new Date()
-        const daysDiff = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
-        
-        if (daysDiff === 1) {
-          // Consecutive day - increase streak
-          data.dailyStreak += 1
-        } else if (daysDiff > 1) {
-          // Streak broken - reset
-          data.dailyStreak = 1
-        }
-        
-        // Reset daily games
-        data.gamesPlayedToday = 0
-        data.lastPlayDate = today
-      }
-      
-      // Calculate painting capacity based on streak and daily games
-      data.paintingCapacity = Math.min(10, 1 + data.dailyStreak + data.gamesPlayedToday)
-      
-      setStreakData(data)
-      onStreakUpdate(data)
+    let data = stored ? JSON.parse(stored) : {
+      minuteStreak: 0,
+      gamesPlayedToday: 0,
+      maxGamesPerDay: 6,
+      paintingCapacity: 1,
+      lastStreakTime: ''
     }
+    
+    // Check if 1 minute has passed since last streak claim
+    const now = Date.now()
+    const oneMinute = 60 * 1000 // 1 minute in milliseconds
+    
+    if (!data.lastStreakTime) {
+      // First time - can claim immediately
+      setCanClaimStreak(true)
+      setTimeUntilNextStreak(0)
+    } else {
+      const lastStreakTime = new Date(data.lastStreakTime).getTime()
+      const timeDiff = now - lastStreakTime
+      
+      if (timeDiff >= oneMinute) {
+        setCanClaimStreak(true)
+        setTimeUntilNextStreak(0)
+      } else {
+        setCanClaimStreak(false)
+        setTimeUntilNextStreak(oneMinute - timeDiff)
+      }
+    }
+    
+    // Calculate painting capacity: base 1 + minute streak (each streak adds 1, max 10)
+    data.paintingCapacity = Math.min(10, 1 + data.minuteStreak)
+    
+    setStreakData(data)
+    onStreakUpdate(data)
   }, [mounted, playerAddress, onStreakUpdate])
+
+  // Timer for next streak availability
+  useEffect(() => {
+    if (canClaimStreak || timeUntilNextStreak <= 0) return
+    
+    console.log('🕐 Starting timer, timeUntilNextStreak:', timeUntilNextStreak)
+    
+    const timer = setInterval(() => {
+      setTimeUntilNextStreak(prev => {
+        const newTime = prev - 1000
+        console.log('⏰ Timer tick:', Math.ceil(newTime / 1000), 'seconds left')
+        
+        if (newTime <= 0) {
+          console.log('✅ Timer finished! Enabling claim button')
+          setCanClaimStreak(true)
+          return 0
+        }
+        return newTime
+      })
+    }, 1000)
+    
+    return () => {
+      console.log('🛑 Clearing timer')
+      clearInterval(timer)
+    }
+  }, [canClaimStreak, timeUntilNextStreak])
 
   // Save streak data to localStorage only after mounting
   useEffect(() => {
     if (!mounted || !playerAddress) return
     localStorage.setItem(`${STORAGE_KEY}-${playerAddress}`, JSON.stringify(streakData))
   }, [mounted, streakData, playerAddress])
+
+  const handleClaimStreak = async () => {
+    if (!canClaimStreak || !playerAddress) return
+    
+    try {
+      // Send transaction to claim streak
+      const txHash = await window.ethereum?.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: playerAddress,
+          to: playerAddress, // Send to self
+          value: '0x0', // 0 ETH
+          gas: '0x5208', // 21000 gas
+          gasPrice: '0x174876E800' // 100 gwei
+        }]
+      })
+      
+      console.log('Streak claim transaction:', txHash)
+      
+      // Update streak data immediately
+      const now = new Date().toISOString()
+      const newStreakCount = streakData.minuteStreak + 1
+      const newData = {
+        ...streakData,
+        minuteStreak: newStreakCount,
+        lastStreakTime: now,
+        paintingCapacity: Math.min(10, 1 + newStreakCount)
+      }
+      
+      // Save to localStorage immediately
+      localStorage.setItem(`${STORAGE_KEY}-${playerAddress}`, JSON.stringify(newData))
+      
+      // Update state
+      setStreakData(newData)
+      onStreakUpdate(newData)
+      
+      // Set timer for next claim (1 minute = 60000ms)
+      setCanClaimStreak(false)
+      setTimeUntilNextStreak(60000)
+      
+      console.log('✅ Streak updated:', newStreakCount, 'Paint capacity:', newData.paintingCapacity)
+      console.log('🕐 Timer set to 60 seconds, canClaimStreak:', false)
+      alert(`✅ Streak claimed! New streak: ${newStreakCount}, Paint capacity: ${newData.paintingCapacity}`)
+      
+    } catch (error) {
+      console.error('Failed to claim streak:', error)
+      alert('Failed to claim streak. Please try again.')
+    }
+  }
 
   const incrementGamePlayed = () => {
     if (streakData.gamesPlayedToday >= streakData.maxGamesPerDay) return
@@ -213,7 +353,7 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
   if (!mounted) {
     return (
       <Container>
-        <Title>🔥 Daily Streak System</Title>
+        <Title>🔥 Minute Streak System</Title>
         <div style={{ textAlign: 'center', opacity: 0.6, padding: '2rem' }}>
           Loading streak data...
         </div>
@@ -223,14 +363,14 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
 
   return (
     <Container>
-      <Title>🔥 Daily Streak System</Title>
+      <Title>🔥 Minute Streak System</Title>
       
       <StreakDisplay>
         <StatCard>
-          <StatValue highlight={streakData.dailyStreak > 0}>
-            {streakData.dailyStreak}
+          <StatValue highlight={streakData.minuteStreak > 0}>
+            {streakData.minuteStreak}
           </StatValue>
-          <StatLabel>Day Streak</StatLabel>
+          <StatLabel>Minute Streak</StatLabel>
         </StatCard>
         
         <StatCard>
@@ -257,27 +397,27 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
       <CapacityInfo>
         🎨 You can paint <strong>{streakData.paintingCapacity}</strong> territories per game
         <br />
-        <small>Base: 1 + Streak: {streakData.dailyStreak} + Games: {streakData.gamesPlayedToday}</small>
+        <small>Base: 1 + Minute Streak: {streakData.minuteStreak} (Each streak +1 capacity)</small>
       </CapacityInfo>
 
-      <StreakBonus show={streakData.dailyStreak >= 3}>
-        🔥 {streakData.dailyStreak} Day Streak! Bonus painting power!
-      </StreakBonus>
+      <ClaimButton
+        onClick={handleClaimStreak}
+        disabled={!canClaimStreak}
+        whileHover={canClaimStreak ? { scale: 1.05 } : {}}
+        whileTap={canClaimStreak ? { scale: 0.95 } : {}}
+      >
+        {canClaimStreak ? '⚡ Claim Streak (1 min)' : '⏰ Streak Claimed'}
+      </ClaimButton>
 
-      {gamesRemaining <= 0 && (
-        <div style={{
-          background: 'rgba(255, 68, 68, 0.1)',
-          border: '1px solid rgba(255, 68, 68, 0.3)',
-          borderRadius: '8px',
-          padding: '0.8rem',
-          textAlign: 'center',
-          fontSize: '0.9rem',
-          marginTop: '1rem',
-          color: '#FF6B6B'
-        }}>
-          ⏰ Daily limit reached! Come back tomorrow for more games.
-        </div>
+      {!canClaimStreak && timeUntilNextStreak > 0 && (
+        <TimerDisplay>
+          ⏰ Next streak in: {Math.ceil(timeUntilNextStreak / 1000)}s
+        </TimerDisplay>
       )}
+
+      <StreakBonus show={streakData.minuteStreak >= 3}>
+        🔥 {streakData.minuteStreak} Minute Streak! Bonus painting power!
+      </StreakBonus>
 
       <div style={{
         fontSize: '0.8rem',
@@ -286,7 +426,7 @@ export default function StreakSystem({ playerAddress, onStreakUpdate }: StreakSy
         marginTop: '1rem',
         lineHeight: 1.4
       }}>
-        💡 Play daily to build your streak and increase painting capacity!
+        💡 Claim streak every minute to increase painting capacity!
         <br />
         Max capacity: 10 territories per game
       </div>
